@@ -5,10 +5,10 @@ services:
     container_name: mysqldb
     image: mysql:latest
     environment:
-      - MYSQL_ROOT_PASSWORD=<password here>
+      - MYSQL_ROOT_PASSWORD=Mocolococo1!
       - MYSQL_DATABASE=icu-connect
       # - MYSQL_USER=root
-      # - MYSQL_PASSWORD=<password here>
+      # - MYSQL_PASSWORD=Mocolococo1!
     restart: always
     ports:
       - 3307:3306
@@ -22,7 +22,7 @@ services:
       context: ./
       dockerfile: Dockerfile
     environment:
-      SPRING_DATASOURCE_PASSWORD: <password here>
+      SPRING_DATASOURCE_PASSWORD: Mocolococo1!
       SPRING_DATASOURCE_USER: root
       SPRING_DATASOURCE_NAME: icu-connect
       SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/icu-connect?createDatabaseIfNotExist=true&autoReconnect=true
