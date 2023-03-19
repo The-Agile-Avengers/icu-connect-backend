@@ -1,13 +1,17 @@
 package com.agileavengers.icuconnectbackend.model;
 
-import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Data
@@ -20,7 +24,7 @@ public class User {
     @GeneratedValue
     private Long id;
 
-    private String username;
+    private String name;
 
     private String email;
 
@@ -28,6 +32,5 @@ public class User {
 
     @ManyToMany()
     private List<Community> subscriptionList = new ArrayList<>();
-
 
 }
