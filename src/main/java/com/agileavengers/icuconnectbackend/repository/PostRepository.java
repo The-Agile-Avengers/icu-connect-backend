@@ -1,11 +1,11 @@
 package com.agileavengers.icuconnectbackend.repository;
 
 import com.agileavengers.icuconnectbackend.model.Post;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface PostRepository extends PagingAndSortingRepository<Post, Long> {
+public interface PostRepository extends JpaRepository<Post, Long> {
     /**
      * Get list of Posts that refer to a specific Community
      * @param communityId Id of the relevant community
