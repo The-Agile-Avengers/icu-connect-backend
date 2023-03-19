@@ -13,7 +13,9 @@ public class RatingDto {
 
     private Long id;
 
-    private Integer teaching;
-    private Integer content;
-    private Integer workload;
+    private CommunityDto communityDto;
+
+    private Double teaching;
+    private Double content;
+    private Double workload;
 }

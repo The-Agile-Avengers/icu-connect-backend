@@ -17,6 +17,7 @@ public class Community {
     @GeneratedValue
     private Long id;
 
+    @Column(unique = true)
     private String moduleId;
 
     private String name;
