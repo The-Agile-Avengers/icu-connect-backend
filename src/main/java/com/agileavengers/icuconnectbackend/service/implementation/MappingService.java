@@ -30,7 +30,7 @@ public class MappingService {
 
     // TODO: Implement rating calculation
     public RatingAverage calculateRating(Community community) {
-        return RatingAverage.builder().teaching(4.0).workload(3.0).content(5.0).build();
+        return new RatingAverage(ratingRepository.findAllByCommunity_Id(community.getId()));
     }
 
     public Integer getReviewThumbsUp(Review review) {
