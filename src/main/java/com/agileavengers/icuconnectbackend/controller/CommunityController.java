@@ -80,12 +80,12 @@ public class CommunityController {
         return communityService.getCommunityRatings(id, page, size);
     }
 
-    @GetMapping(value = "/{id}/ratings/average", params = { "page", "size" })
+    @GetMapping(value = "/{id}/ratings/average")
     public RatingAverage getCommunityRatingAverage(@PathVariable("id") Long id) {
         return communityService.getCommunityRatingAverage(id);
     }
 
-    @PostMapping(value = "/{id}/ratings", params = { "page", "size" })
+    @PostMapping(value = "/{id}/ratings")
     public RatingDto rateCommunity(@PathVariable("id") Long id, @RequestBody RatingDto ratingDto) {
         // TODO: provide actual username
         return communityService.createCommunityRating(id, ratingDto, "");
