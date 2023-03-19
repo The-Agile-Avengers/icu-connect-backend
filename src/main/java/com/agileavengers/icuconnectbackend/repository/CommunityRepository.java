@@ -1,7 +1,7 @@
 package com.agileavengers.icuconnectbackend.repository;
 
 import com.agileavengers.icuconnectbackend.model.Community;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface CommunityRepository extends PagingAndSortingRepository<Community, Long> {
+public interface CommunityRepository extends JpaRepository<Community, Long> {
 }
