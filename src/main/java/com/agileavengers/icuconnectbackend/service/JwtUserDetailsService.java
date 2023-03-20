@@ -37,14 +37,14 @@ public class JwtUserDetailsService implements UserDetailsService {
 	}
 
 	public void saveUser(RegisterUserDto user) throws Exception {
-		if (userRepository.findByUsername(user.getName()).isPresent()) {
+		if (userRepository.findByUsername(user.getUsername()).isPresent()) {
 			throw new Exception();
 		}
 		if (userRepository.findByEmail(user.getEmail()).isPresent()) {
 			throw new Exception();
 		}
 		User newUser = new User();
-		newUser.setUsername(user.getName());
+		newUser.setUsername(user.getUsername());
 		newUser.setPassword(bcryptEncoder.encode(user.getPassword()));
 		newUser.setEmail(user.getEmail());
 		userRepository.save(newUser);
