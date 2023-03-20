@@ -1,5 +1,6 @@
 package com.agileavengers.icuconnectbackend.controller;
 
+import com.agileavengers.icuconnectbackend.model.User;
 import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
 import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
 import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
@@ -7,6 +8,7 @@ import com.agileavengers.icuconnectbackend.model.dto.ReviewDto;
 import com.agileavengers.icuconnectbackend.service.ICommunityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -88,7 +90,11 @@ public class CommunityController {
     @PostMapping(value = "/{id}/ratings")
     public RatingDto rateCommunity(@PathVariable("id") Long id, @RequestBody RatingDto ratingDto) {
         // TODO: provide actual username
-        return communityService.createCommunityRating(id, ratingDto, "");
+        User principal =
+                (User) SecurityContextHolder
+                        .getContext()
+                        .getAuthentication().getPrincipal();
+        return communityService.createCommunityRating(id, ratingDto, principal.getUsername());
     }
 
     /**

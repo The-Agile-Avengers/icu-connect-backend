@@ -50,7 +50,9 @@ public class CommunityService implements ICommunityService {
                      RatingRepository ratingRepository,
                      UserRepository userRepository,
                      CommunityMapper communityMapper,
-                     ReviewMapper reviewMapper, RatingMapper ratingMapper, InstructorMapper instructorMapper) {
+                     ReviewMapper reviewMapper,
+                     RatingMapper ratingMapper,
+                     InstructorMapper instructorMapper) {
         this.communityRepository = communityRepository;
         this.instructorRepository = instructorRepository;
         this.reviewRepository = reviewRepository;
@@ -69,6 +71,11 @@ public class CommunityService implements ICommunityService {
 
         Community community = Community.builder().name("Lecture 1").moduleId("UZH123").instructor(instructor).build();
         community = communityRepository.save(community);
+
+        User user = User.builder().username("Test").password("password").build();
+        userRepository.save(user);
+
+        createCommunityRating(community.getId(), RatingDto.builder().teaching(3.0).content(2.5).workload(5.0).build(), user.getUsername());
 
         return communityMapper.toDto(community);
     }
