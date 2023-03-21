@@ -1,9 +1,10 @@
 package com.agileavengers.icuconnectbackend.repository;
 
 import com.agileavengers.icuconnectbackend.model.Post;
+import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
     /**
@@ -11,5 +12,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
      * @param communityId Id of the relevant community
      * @return List of all referenced posts
      */
-    List<Post> findAllByCommunity_Id(Long communityId);
+    Page<Post> findAllByCommunity_Id(Long communityId, Pageable pageable);
+    @Transactional()
+    void deletePostById(Long id);
 }

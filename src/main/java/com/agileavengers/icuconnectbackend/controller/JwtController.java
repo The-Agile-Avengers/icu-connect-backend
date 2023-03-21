@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,7 +20,6 @@ import jakarta.validation.Valid;
 
 // TODO: More detailed error handling
 @RestController
-@CrossOrigin
 public class JwtController {
 
     @Autowired
@@ -36,9 +34,9 @@ public class JwtController {
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(
             @RequestBody JwtRequestDto authenticationRequest) throws Exception {
-        authenticate(authenticationRequest.getName(), authenticationRequest.getPassword());
+        authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
 
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getName());
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
 
         final String token = jwtTokenUtil.generateToken(userDetails);
 
@@ -55,7 +53,7 @@ public class JwtController {
         }
     }
 
-    private void authenticate(String name, String password) throws Exception {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(name, password));
+    private void authenticate(String username, String password) throws Exception {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
     }
 }

@@ -16,8 +16,6 @@ public class ReviewDto {
 
     private UserDto creator;
 
-    private Float rating;
-
     private Timestamp creation;
 
     private String title;

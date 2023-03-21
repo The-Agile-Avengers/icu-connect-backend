@@ -26,6 +26,6 @@ public class CommunityDto {
     /**
      * Average rating object
      */
-    private RatingDto rating;
+    private RatingAverage rating;
 
 }

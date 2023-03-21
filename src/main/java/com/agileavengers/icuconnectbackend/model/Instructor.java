@@ -20,6 +20,7 @@ public class Instructor {
     @GeneratedValue
     private Long id;
 
+    @Column(unique = true)
     private String name;
 
 }
