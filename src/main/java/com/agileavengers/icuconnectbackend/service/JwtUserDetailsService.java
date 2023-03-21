@@ -1,18 +1,21 @@
 package com.agileavengers.icuconnectbackend.service;
 
-import com.agileavengers.icuconnectbackend.model.User;
-import com.agileavengers.icuconnectbackend.model.dto.RegisterUserDto;
-import com.agileavengers.icuconnectbackend.repository.UserRepository;
+import java.util.ArrayList;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.Optional;
+import com.agileavengers.icuconnectbackend.model.User;
+import com.agileavengers.icuconnectbackend.model.dto.RegisterUserDto;
+import com.agileavengers.icuconnectbackend.repository.UserRepository;
 
 @Service
 public class JwtUserDetailsService implements UserDetailsService {
@@ -36,12 +39,12 @@ public class JwtUserDetailsService implements UserDetailsService {
 				user.getPassword(), new ArrayList<>());
 	}
 
-	public void saveUser(RegisterUserDto user) throws Exception {
+	public void saveUser(RegisterUserDto user) throws ResponseStatusException {
 		if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-			throw new Exception();
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already taken.");
 		}
 		if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-			throw new Exception();
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already taken.");
 		}
 		User newUser = new User();
 		newUser.setUsername(user.getUsername());
