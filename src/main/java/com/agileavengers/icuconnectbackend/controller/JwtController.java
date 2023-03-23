@@ -45,15 +45,11 @@ public class JwtController {
 
     @PostMapping("/users")
     public ResponseEntity<?> saveUser(@Valid @RequestBody RegisterUserDto userDto) throws Exception {
-        try {
-            userDetailsService.saveUser(userDto);
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Name/Email already taken!");
-        }
+        userDetailsService.saveUser(userDto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    private void authenticate(String username, String password) throws Exception {
+    private void authenticate(String username, String password) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
     }
 }
