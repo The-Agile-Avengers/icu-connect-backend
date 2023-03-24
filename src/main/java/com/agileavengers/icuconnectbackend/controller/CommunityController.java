@@ -4,7 +4,6 @@ import com.agileavengers.icuconnectbackend.model.User;
 import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
 import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
 import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
-import com.agileavengers.icuconnectbackend.model.dto.ReviewDto;
 import com.agileavengers.icuconnectbackend.service.ICommunityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -63,19 +62,26 @@ public class CommunityController {
         return communityService.getCommunity(id);
     }
 
+//    /**
+//     * Get all reviews linked to a community
+//     * @param id id of the community
+//     * @param page page index
+//     * @param size number of reviews per page
+//     * @return Page of reviews
+//     */
+//    @GetMapping(value = "/{id}/reviews", params = { "page", "size" })
+//    public Page<ReviewDto> getCommunityReviews(@PathVariable("id") Long id, @RequestParam("page") int page,
+//                                               @RequestParam("size") int size) {
+//        return communityService.getCommunityReviews(id, page, size);
+//    }
+
     /**
-     * Get all reviews linked to a community
+     * Get all ratings linked to a community
      * @param id id of the community
      * @param page page index
-     * @param size number of reviews per page
-     * @return Page of reviews
+     * @param size number of ratings per page
+     * @return Page of ratings
      */
-    @GetMapping(value = "/{id}/reviews", params = { "page", "size" })
-    public Page<ReviewDto> getCommunityReviews(@PathVariable("id") Long id, @RequestParam("page") int page,
-                                               @RequestParam("size") int size) {
-        return communityService.getCommunityReviews(id, page, size);
-    }
-
     @GetMapping(value = "/{id}/ratings", params = { "page", "size" })
     public Page<RatingDto> getCommunityRatings(@PathVariable("id") Long id, @RequestParam("page") int page,
                                                @RequestParam("size") int size) {

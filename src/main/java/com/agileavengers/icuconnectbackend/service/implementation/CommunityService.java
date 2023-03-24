@@ -44,15 +44,15 @@ public class CommunityService implements ICommunityService {
 
 
     @Autowired
-    CommunityService(CommunityRepository communityRepository,
-                     InstructorRepository instructorRepository,
-                     ReviewRepository reviewRepository,
-                     RatingRepository ratingRepository,
-                     UserRepository userRepository,
-                     CommunityMapper communityMapper,
-                     ReviewMapper reviewMapper,
-                     RatingMapper ratingMapper,
-                     InstructorMapper instructorMapper) {
+    public CommunityService(CommunityRepository communityRepository,
+                            InstructorRepository instructorRepository,
+                            ReviewRepository reviewRepository,
+                            RatingRepository ratingRepository,
+                            UserRepository userRepository,
+                            CommunityMapper communityMapper,
+                            ReviewMapper reviewMapper,
+                            RatingMapper ratingMapper,
+                            InstructorMapper instructorMapper) {
         this.communityRepository = communityRepository;
         this.instructorRepository = instructorRepository;
         this.reviewRepository = reviewRepository;
@@ -121,12 +121,12 @@ public class CommunityService implements ICommunityService {
         );
     }
 
-    @Override
-    public Page<ReviewDto> getCommunityReviews(Long id, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Review> reviewPage = reviewRepository.findAllByCommunity_Id(id, pageable);
-        return reviewPage.map(reviewMapper::toDto);
-    }
+//    @Override
+//    public Page<ReviewDto> getCommunityReviews(Long id, int page, int size) {
+//        Pageable pageable = PageRequest.of(page, size);
+//        Page<Review> reviewPage = reviewRepository.findAllByCommunity_Id(id, pageable);
+//        return reviewPage.map(reviewMapper::toDto);
+//    }
 
     @Override
     public Page<RatingDto> getCommunityRatings(Long id, int page, int size) {

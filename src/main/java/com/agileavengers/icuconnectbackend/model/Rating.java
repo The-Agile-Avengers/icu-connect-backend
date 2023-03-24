@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -25,4 +27,9 @@ public class Rating {
     private Integer teaching;
     private Integer content;
     private Integer workload;
+
+    private String text;
+
+    @ManyToMany
+    private Set<User> thumbsUp;
 }
