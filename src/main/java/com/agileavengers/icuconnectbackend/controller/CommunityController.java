@@ -8,6 +8,7 @@ import com.agileavengers.icuconnectbackend.service.ICommunityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -96,8 +97,8 @@ public class CommunityController {
     @PostMapping(value = "/{id}/ratings")
     public RatingDto rateCommunity(@PathVariable("id") Long id, @RequestBody RatingDto ratingDto) {
         // TODO: provide actual username
-        User principal =
-                (User) SecurityContextHolder
+        UserDetails principal =
+                (UserDetails) SecurityContextHolder
                         .getContext()
                         .getAuthentication().getPrincipal();
         return communityService.createCommunityRating(id, ratingDto, principal.getUsername());
