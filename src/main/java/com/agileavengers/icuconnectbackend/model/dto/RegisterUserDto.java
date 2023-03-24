@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class RegisterUserDto {
 
     @NotNull(message = "Invalid name: Name is NULL")
-    private String name;
+    private String username;
 
     @NotNull(message = "Invalid password: Password is NULL")
     private String password;

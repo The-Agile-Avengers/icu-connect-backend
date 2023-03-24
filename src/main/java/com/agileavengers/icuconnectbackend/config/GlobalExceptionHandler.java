@@ -13,6 +13,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -24,9 +25,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<String> handleValidationErrors(BadCredentialsException ex) {
+    public ResponseStatusException handleValidationErrors(BadCredentialsException ex) {
         String error = ex.getMessage().toString();
-        return new ResponseEntity<String>(error, HttpStatus.BAD_REQUEST);
+        return new ResponseStatusException(HttpStatus.BAD_REQUEST, error);
     }
 
     private Map<String, List<String>> getErrorsMap(List<String> errors) {
