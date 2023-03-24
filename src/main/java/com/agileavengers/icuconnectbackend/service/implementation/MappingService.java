@@ -22,7 +22,7 @@ public class MappingService {
 
     // TODO: Implement subscriber count
     public Integer subscriberCount(Community community)  {
-        return 10;
+        return userRepository.countAllBySubscriptionListContaining(community);
     }
 
     // TODO: Implement rating calculation

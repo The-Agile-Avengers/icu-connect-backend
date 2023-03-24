@@ -25,6 +25,5 @@ class MappingServiceTest {
 
     @Test
     void subscriberCount() {
-        mappingService.calculateRating(null);
     }
 }
