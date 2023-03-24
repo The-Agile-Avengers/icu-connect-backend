@@ -21,6 +21,9 @@ public class RatingAverage {
     private Double workload;
 
     public RatingAverage(List<Rating> ratings) {
+        if (ratings == null || ratings.isEmpty()) {
+            return;
+        }
         this.teaching = ratings.stream().mapToDouble(Rating::getTeaching).sum()/ratings.size();
         this.content = ratings.stream().mapToDouble(Rating::getContent).sum()/ratings.size();
         this.workload = ratings.stream().mapToDouble(Rating::getWorkload).sum()/ratings.size();
