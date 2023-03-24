@@ -1,10 +1,9 @@
 package com.agileavengers.icuconnectbackend.service.implementation;
 
 import com.agileavengers.icuconnectbackend.model.Community;
-import com.agileavengers.icuconnectbackend.model.Review;
+import com.agileavengers.icuconnectbackend.model.Rating;
 import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
 import com.agileavengers.icuconnectbackend.repository.RatingRepository;
-import com.agileavengers.icuconnectbackend.repository.ReviewRepository;
 import com.agileavengers.icuconnectbackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,13 +13,11 @@ public class MappingService {
 
     UserRepository userRepository;
     RatingRepository ratingRepository;
-    ReviewRepository reviewRepository;
 
     @Autowired
-    MappingService(UserRepository userRepository, RatingRepository ratingRepository, ReviewRepository reviewRepository) {
+    public MappingService(UserRepository userRepository, RatingRepository ratingRepository) {
         this.userRepository = userRepository;
         this.ratingRepository = ratingRepository;
-        this.reviewRepository = reviewRepository;
     }
 
     // TODO: Implement subscriber count
@@ -33,7 +30,7 @@ public class MappingService {
         return new RatingAverage(ratingRepository.findAllByCommunity_Id(community.getId()));
     }
 
-    public Integer getReviewThumbsUp(Review review) {
-        return review.getThumbsUp().size();
+    public Integer getRatingThumbsUp(Rating rating) {
+        return rating.getThumbsUp().size();
     }
 }

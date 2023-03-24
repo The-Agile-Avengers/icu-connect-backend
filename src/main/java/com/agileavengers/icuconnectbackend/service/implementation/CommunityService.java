@@ -3,13 +3,17 @@ package com.agileavengers.icuconnectbackend.service.implementation;
 import com.agileavengers.icuconnectbackend.mapper.CommunityMapper;
 import com.agileavengers.icuconnectbackend.mapper.InstructorMapper;
 import com.agileavengers.icuconnectbackend.mapper.RatingMapper;
-import com.agileavengers.icuconnectbackend.mapper.ReviewMapper;
-import com.agileavengers.icuconnectbackend.model.*;
+import com.agileavengers.icuconnectbackend.model.Community;
+import com.agileavengers.icuconnectbackend.model.Instructor;
+import com.agileavengers.icuconnectbackend.model.Rating;
+import com.agileavengers.icuconnectbackend.model.User;
 import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
 import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
 import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
-import com.agileavengers.icuconnectbackend.model.dto.ReviewDto;
-import com.agileavengers.icuconnectbackend.repository.*;
+import com.agileavengers.icuconnectbackend.repository.CommunityRepository;
+import com.agileavengers.icuconnectbackend.repository.InstructorRepository;
+import com.agileavengers.icuconnectbackend.repository.RatingRepository;
+import com.agileavengers.icuconnectbackend.repository.UserRepository;
 import com.agileavengers.icuconnectbackend.service.ICommunityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,14 +33,11 @@ public class CommunityService implements ICommunityService {
 
     InstructorRepository instructorRepository;
 
-    ReviewRepository reviewRepository;
-
     RatingRepository ratingRepository;
 
     UserRepository userRepository;
 
     private final CommunityMapper communityMapper;
-    private final ReviewMapper reviewMapper;
     private final RatingMapper ratingMapper;
     private final InstructorMapper instructorMapper;
 
@@ -46,20 +47,16 @@ public class CommunityService implements ICommunityService {
     @Autowired
     public CommunityService(CommunityRepository communityRepository,
                             InstructorRepository instructorRepository,
-                            ReviewRepository reviewRepository,
                             RatingRepository ratingRepository,
                             UserRepository userRepository,
                             CommunityMapper communityMapper,
-                            ReviewMapper reviewMapper,
                             RatingMapper ratingMapper,
                             InstructorMapper instructorMapper) {
         this.communityRepository = communityRepository;
         this.instructorRepository = instructorRepository;
-        this.reviewRepository = reviewRepository;
         this.ratingRepository = ratingRepository;
         this.userRepository = userRepository;
         this.communityMapper = communityMapper;
-        this.reviewMapper = reviewMapper;
         this.ratingMapper = ratingMapper;
         this.instructorMapper = instructorMapper;
     }

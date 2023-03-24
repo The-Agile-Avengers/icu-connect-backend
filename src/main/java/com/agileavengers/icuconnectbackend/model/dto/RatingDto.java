@@ -25,5 +25,5 @@ public class RatingDto {
 
     private String text;
 
-    private Set<User> thumbsUp;
+    private Integer thumbsUp;
 }

@@ -1,5 +1,6 @@
 package com.agileavengers.icuconnectbackend.service;
 
+import com.agileavengers.icuconnectbackend.IcuConnectBackendApplication;
 import com.agileavengers.icuconnectbackend.mapper.*;
 import com.agileavengers.icuconnectbackend.model.Community;
 import com.agileavengers.icuconnectbackend.model.Instructor;
@@ -11,19 +12,29 @@ import com.agileavengers.icuconnectbackend.service.implementation.MappingService
 import org.junit.gen5.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.mockito.Mockito.*;
 
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
-@SpringBootTest(classes = { CommunityMapperImpl.class, ReviewMapperImpl.class, RatingMapperImpl.class, InstructorMapperImpl.class, MappingService.class})
+//@SpringBootTest(classes = {CommunityMapperImpl.class, RatingMapperImpl.class, InstructorMapperImpl.class})
+//@ContextConfiguration(classes = { CommunityMapperImpl.class, RatingMapperImpl.class, InstructorMapperImpl.class,
+//        UserRepository.class, CommunityRepository.class, InstructorRepository.class, RatingRepository.class
+//
+//})
+@SpringBootTest()
+@ComponentScan(basePackageClasses = IcuConnectBackendApplication.class)
 class ICommunityServiceTest {
 
     ICommunityService communityService;
@@ -32,8 +43,6 @@ class ICommunityServiceTest {
     CommunityRepository communityRepository;
     @Mock
     InstructorRepository instructorRepository;
-    @Mock
-    ReviewRepository reviewRepository;
     @Mock
     RatingRepository ratingRepository;
     @Mock
@@ -47,28 +56,17 @@ class ICommunityServiceTest {
 //            = Mappers.getMapper(RatingMapper.class);
 //    private InstructorMapper instructorMapper
 //            = Mappers.getMapper(InstructorMapper.class);
-    @Autowired
-    private MappingService mappingService;
 
-    @Autowired
-    private CommunityMapper communityMapper;
-    @Autowired
-    private ReviewMapper reviewMapper;
-    @Autowired
-    private RatingMapper ratingMapper;
-    @Autowired
-    private InstructorMapper instructorMapper;
+//    private MappingService mappingService;
+//
+//    private CommunityMapper communityMapper;
+//
+//    private RatingMapper ratingMapper;
+//
+//    private InstructorMapper instructorMapper;
 
     ICommunityServiceTest() {
-        communityRepository = mock(CommunityRepository.class);
-        instructorRepository = mock(InstructorRepository.class);
-        reviewRepository = mock(ReviewRepository.class);
-        communityRepository = mock(CommunityRepository.class);
-        userRepository = mock(UserRepository.class);
-        this.communityService = new CommunityService(communityRepository, instructorRepository,
-                reviewRepository, ratingRepository, userRepository,
-                this.communityMapper, this.reviewMapper, this.ratingMapper, this.instructorMapper
-        );
+
     }
 
     @Test
@@ -77,6 +75,20 @@ class ICommunityServiceTest {
 
     @Test
     void createCommunityNewInstructor() {
+        communityRepository = mock(CommunityRepository.class);
+        instructorRepository = mock(InstructorRepository.class);
+        communityRepository = mock(CommunityRepository.class);
+        userRepository = mock(UserRepository.class);
+        ratingRepository = mock(RatingRepository.class);
+        MappingService mappingService = new MappingService(userRepository, ratingRepository);
+        CommunityMapper communityMapper = Mappers.getMapper(CommunityMapper.class);
+        communityMapper.setMappingService(mappingService);
+        RatingMapper ratingMapper = Mappers.getMapper(RatingMapper.class);
+        ratingMapper.setMappingService(mappingService);
+        InstructorMapper instructorMapper = Mappers.getMapper(InstructorMapper.class);
+        this.communityService = new CommunityService(communityRepository, instructorRepository, ratingRepository, userRepository,
+                communityMapper, ratingMapper, instructorMapper
+        );
 //        communityRepository = mock(CommunityRepository.class);
 //        instructorRepository = mock(InstructorRepository.class);
 //        reviewRepository = mock(ReviewRepository.class);
@@ -91,7 +103,7 @@ class ICommunityServiceTest {
                 });
         when(communityRepository.save(Mockito.any(Community.class)))
                 .thenAnswer(i -> {
-                    Instructor argument = (Instructor) i.getArguments()[0];
+                    Community argument = (Community) i.getArguments()[0];
                     argument.setId(1L);
                     return argument;
                 });
