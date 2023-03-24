@@ -1,9 +1,8 @@
 package com.agileavengers.icuconnectbackend.service;
 
-import com.agileavengers.icuconnectbackend.model.User;
-import com.agileavengers.icuconnectbackend.model.dto.RegisterUserDto;
-import com.agileavengers.icuconnectbackend.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.ArrayList;
+import java.util.Optional;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,24 +12,32 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.Optional;
+import com.agileavengers.icuconnectbackend.mapper.UserMapper;
+import com.agileavengers.icuconnectbackend.model.User;
+import com.agileavengers.icuconnectbackend.model.dto.RegisterUserDto;
+import com.agileavengers.icuconnectbackend.repository.UserRepository;
 
 @Service
 public class JwtUserDetailsService implements UserDetailsService {
-    @Autowired
-    private UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder bcryptEncoder;
+	private UserRepository userRepository;
 
-    @Override
-    @Transactional
-    public UserDetails loadUserByUsername(String name) throws UsernameNotFoundException {
-        Optional<User> optionalUser = userRepository.findByUsername(name);
-        if (optionalUser.isEmpty()) {
-            throw new UsernameNotFoundException("User not found with name: " + name);
-        }
+	private PasswordEncoder bcryptEncoder;
+
+	private final UserMapper userMapper;
+
+	JwtUserDetailsService(UserRepository userRepository, UserMapper userMapper) {
+		this.userRepository = userRepository;
+		this.userMapper = userMapper;
+	}
+
+	@Override
+	@Transactional
+	public UserDetails loadUserByUsername(String name) throws UsernameNotFoundException {
+		Optional<User> optionalUser = userRepository.findByUsername(name);
+		if (optionalUser.isEmpty()) {
+			throw new UsernameNotFoundException("User not found with name: " + name);
+		}
 
         User user = optionalUser.get();
 
@@ -38,17 +45,15 @@ public class JwtUserDetailsService implements UserDetailsService {
                 user.getPassword(), new ArrayList<>());
     }
 
-    public void saveUser(RegisterUserDto user) throws ResponseStatusException {
-        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already taken.");
-        }
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already taken.");
-        }
-        User newUser = new User();
-        newUser.setUsername(user.getUsername());
-        newUser.setPassword(bcryptEncoder.encode(user.getPassword()));
-        newUser.setEmail(user.getEmail());
-        userRepository.save(newUser);
-    }
+	public User saveUser(RegisterUserDto registerUserDto) throws ResponseStatusException {
+		if (userRepository.findByUsername(registerUserDto.getUsername()).isPresent()) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already taken.");
+		}
+		if (userRepository.findByEmail(registerUserDto.getEmail()).isPresent()) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already taken.");
+		}
+		User newUser = userMapper.fromDto(registerUserDto);
+		// newUser.setPassword(bcryptEncoder.encode(user.getPassword()));
+		return userRepository.save(newUser);
+	}
 }
