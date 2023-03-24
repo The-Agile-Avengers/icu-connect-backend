@@ -1,15 +1,23 @@
 package com.agileavengers.icuconnectbackend.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.agileavengers.icuconnectbackend.model.User;
 import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
 import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
 import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
 import com.agileavengers.icuconnectbackend.model.dto.ReviewDto;
 import com.agileavengers.icuconnectbackend.service.ICommunityService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/communities")
@@ -24,6 +32,7 @@ public class CommunityController {
 
     /**
      * Generates example data objects. Will be removed for production
+     * 
      * @return Community Object
      */
     @PostMapping(value = "/setup")
@@ -33,6 +42,7 @@ public class CommunityController {
 
     /**
      * Create a new community. Unique module id is required
+     * 
      * @param communityDto Information about the community.
      * @return The created community
      */
@@ -43,18 +53,20 @@ public class CommunityController {
 
     /**
      * Pageable request that returns all communities
+     * 
      * @param page page index
      * @param size number of communities per page
      * @return Page of communities
      */
     @GetMapping(value = "", params = { "page", "size" })
     public Page<CommunityDto> getCommunities(@RequestParam("page") int page,
-                                             @RequestParam("size") int size) {
+            @RequestParam("size") int size) {
         return communityService.getCommunities(page, size);
     }
 
     /**
      * Get a specific community by id
+     * 
      * @param id id of the community
      * @return Community if it exists
      */
@@ -65,20 +77,21 @@ public class CommunityController {
 
     /**
      * Get all reviews linked to a community
-     * @param id id of the community
+     * 
+     * @param id   id of the community
      * @param page page index
      * @param size number of reviews per page
      * @return Page of reviews
      */
     @GetMapping(value = "/{id}/reviews", params = { "page", "size" })
     public Page<ReviewDto> getCommunityReviews(@PathVariable("id") Long id, @RequestParam("page") int page,
-                                               @RequestParam("size") int size) {
+            @RequestParam("size") int size) {
         return communityService.getCommunityReviews(id, page, size);
     }
 
     @GetMapping(value = "/{id}/ratings", params = { "page", "size" })
     public Page<RatingDto> getCommunityRatings(@PathVariable("id") Long id, @RequestParam("page") int page,
-                                               @RequestParam("size") int size) {
+            @RequestParam("size") int size) {
         return communityService.getCommunityRatings(id, page, size);
     }
 
@@ -90,20 +103,20 @@ public class CommunityController {
     @PostMapping(value = "/{id}/ratings")
     public RatingDto rateCommunity(@PathVariable("id") Long id, @RequestBody RatingDto ratingDto) {
         // TODO: provide actual username
-        User principal =
-                (User) SecurityContextHolder
-                        .getContext()
-                        .getAuthentication().getPrincipal();
+        User principal = (User) SecurityContextHolder
+                .getContext()
+                .getAuthentication().getPrincipal();
         return communityService.createCommunityRating(id, ratingDto, principal.getUsername());
     }
 
     /**
      * Delete a community.
+     * 
      * @param id id of the community to be deleted
      */
     @DeleteMapping(value = "/{id}")
     public void deleteCommunity(@PathVariable("id") Long id) {
-        //TODO: only allowed with specific rights. might be removed for production
+        // TODO: only allowed with specific rights. might be removed for production
         communityService.deleteCommunity(id);
     }
 }

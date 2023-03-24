@@ -1,6 +1,7 @@
 package com.agileavengers.icuconnectbackend.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,7 +15,7 @@ import com.agileavengers.icuconnectbackend.config.JwtTokenUtil;
 import com.agileavengers.icuconnectbackend.model.dto.JwtRequestDto;
 import com.agileavengers.icuconnectbackend.model.dto.JwtResponseDto;
 import com.agileavengers.icuconnectbackend.model.dto.RegisterUserDto;
-import com.agileavengers.icuconnectbackend.service.JwtUserDetailsService;
+import com.agileavengers.icuconnectbackend.service.implementation.JwtUserDetailsService;
 
 import jakarta.validation.Valid;
 
@@ -22,14 +23,20 @@ import jakarta.validation.Valid;
 @RestController
 public class JwtController {
 
-    @Autowired
     private AuthenticationManager authenticationManager;
 
-    @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
-    @Autowired
     private JwtUserDetailsService userDetailsService;
+
+    @Autowired
+    @Lazy
+    JwtController(AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil,
+            JwtUserDetailsService userDetailsService) {
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenUtil = jwtTokenUtil;
+        this.userDetailsService = userDetailsService;
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(
