@@ -11,8 +11,10 @@ import com.agileavengers.icuconnectbackend.service.implementation.MappingService
 import org.junit.gen5.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -20,21 +22,21 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith({SpringExtension.class, MockitoExtension.class})
 @SpringBootTest(classes = { CommunityMapperImpl.class, ReviewMapperImpl.class, RatingMapperImpl.class, InstructorMapperImpl.class, MappingService.class})
 class ICommunityServiceTest {
 
     ICommunityService communityService;
 
-    @MockBean
+    @Mock
     CommunityRepository communityRepository;
-    @MockBean
+    @Mock
     InstructorRepository instructorRepository;
-    @MockBean
+    @Mock
     ReviewRepository reviewRepository;
-    @MockBean
+    @Mock
     RatingRepository ratingRepository;
-    @MockBean
+    @Mock
     UserRepository userRepository;
 
 //    private CommunityMapper communityMapper
@@ -45,6 +47,8 @@ class ICommunityServiceTest {
 //            = Mappers.getMapper(RatingMapper.class);
 //    private InstructorMapper instructorMapper
 //            = Mappers.getMapper(InstructorMapper.class);
+    @Autowired
+    private MappingService mappingService;
 
     @Autowired
     private CommunityMapper communityMapper;
