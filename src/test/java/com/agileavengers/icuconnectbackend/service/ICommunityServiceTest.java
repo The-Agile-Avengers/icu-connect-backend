@@ -11,6 +11,7 @@ import com.agileavengers.icuconnectbackend.model.User;
 import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
 import com.agileavengers.icuconnectbackend.model.dto.InstructorDto;
 import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
+import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
 import com.agileavengers.icuconnectbackend.repository.CommunityRepository;
 import com.agileavengers.icuconnectbackend.repository.InstructorRepository;
 import com.agileavengers.icuconnectbackend.repository.RatingRepository;
@@ -29,6 +30,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -168,7 +170,7 @@ class ICommunityServiceTest {
         when(communityRepository.findAll(Mockito.any(Pageable.class)))
                 .thenAnswer(i -> {
                     Pageable argument = (Pageable) i.getArguments()[0];
-                    return new PageImpl<>(communityList.subList(0, 2), argument, communityList.size());
+                    return new PageImpl<>(communityList.subList(argument.getPageNumber(), argument.getPageSize()), argument, communityList.size());
                 });
 
         Page<CommunityDto> result = communityService.getCommunities(0, 2);
@@ -182,7 +184,7 @@ class ICommunityServiceTest {
 
     @Test
     void getCommunity() {
-        Instructor instructor = Instructor.builder().name("Test Instructor").build();
+        Instructor instructor = Instructor.builder().id(10L).name("Test Instructor").build();
         Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
         when(communityRepository.findById(1L))
                 .thenAnswer(i -> Optional.of(community));
@@ -229,6 +231,32 @@ class ICommunityServiceTest {
 
     @Test
     void getCommunityRatings() {
+        Instructor instructor = Instructor.builder().id(2L).name("Test Instructor").build();
+        Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
+
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(List.of(community)).build();
+
+        User user2 = User.builder().username("Test2").password("anything").id(3L).build();
+
+        Rating rating = Rating.builder().creator(user1).community(community).content(4).workload(3).teaching(1).build();
+        Rating rating2 = Rating.builder().creator(user2).community(community).content(5).workload(2).teaching(4).build();
+        List<Rating> ratingList = List.of(rating, rating2);
+
+        Pageable pageable = PageRequest.of(0,1);
+
+        when(ratingRepository.findAllByCommunity_Id(1L, pageable))
+                .thenAnswer(i -> {
+                    Pageable argument = (Pageable) i.getArguments()[1];
+                    return new PageImpl<>(ratingList.subList(argument.getPageNumber(), argument.getPageSize()), argument, ratingList.size());
+                });
+
+        Page<RatingDto> result = communityService.getCommunityRatings(community.getId(), pageable.getPageNumber(), pageable.getPageSize());
+
+        Assertions.assertNotNull(result, "Page should not be null");
+        Assertions.assertEquals(2L, result.getTotalElements(), "Result should contain two elements.");
+        Assertions.assertEquals(2, result.getTotalPages(), "Result should contain two pages.");
+        Assertions.assertEquals(1, result.getContent().size(), "Result page should contain one element.");
+
     }
 
     @Test

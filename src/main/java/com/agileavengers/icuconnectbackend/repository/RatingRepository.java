@@ -12,11 +12,14 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
 
     @Transactional()
     void deleteRatingById(Long id);
+
     /**
      * Get list of Ratings that refer to a specific Community
+     *
      * @param communityId Id of the relevant community
      * @return List of all referenced ratings
      */
     Page<Rating> findAllByCommunity_Id(Long communityId, Pageable pageable);
+
     List<Rating> findAllByCommunity_Id(Long communityId);
 }

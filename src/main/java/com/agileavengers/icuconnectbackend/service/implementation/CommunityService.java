@@ -29,19 +29,13 @@ import java.util.Optional;
 @Service
 public class CommunityService implements ICommunityService {
 
-    CommunityRepository communityRepository;
-
-    InstructorRepository instructorRepository;
-
-    RatingRepository ratingRepository;
-
-    UserRepository userRepository;
-
     private final CommunityMapper communityMapper;
     private final RatingMapper ratingMapper;
     private final InstructorMapper instructorMapper;
-
-
+    CommunityRepository communityRepository;
+    InstructorRepository instructorRepository;
+    RatingRepository ratingRepository;
+    UserRepository userRepository;
 
 
     @Autowired
@@ -145,9 +139,9 @@ public class CommunityService implements ICommunityService {
                     HttpStatus.BAD_REQUEST, "not all categories were rated"
             );
         }
-        if (ratingDto.getTeaching() < 0.0  ||ratingDto.getTeaching() > 5.0
-                || ratingDto.getWorkload() < 0.0  ||ratingDto.getWorkload() > 5.0
-                || ratingDto.getContent() < 0.0 ||ratingDto.getContent() > 5.0
+        if (ratingDto.getTeaching() < 0.0 || ratingDto.getTeaching() > 5.0
+                || ratingDto.getWorkload() < 0.0 || ratingDto.getWorkload() > 5.0
+                || ratingDto.getContent() < 0.0 || ratingDto.getContent() > 5.0
         ) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, "ratings are not within range"

@@ -1,6 +1,5 @@
 package com.agileavengers.icuconnectbackend.controller;
 
-import com.agileavengers.icuconnectbackend.model.User;
 import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
 import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
 import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
@@ -24,6 +23,7 @@ public class CommunityController {
 
     /**
      * Generates example data objects. Will be removed for production
+     *
      * @return Community Object
      */
     @PostMapping(value = "/setup")
@@ -33,6 +33,7 @@ public class CommunityController {
 
     /**
      * Create a new community. Unique module id is required
+     *
      * @param communityDto Information about the community.
      * @return The created community
      */
@@ -43,11 +44,12 @@ public class CommunityController {
 
     /**
      * Pageable request that returns all communities
+     *
      * @param page page index
      * @param size number of communities per page
      * @return Page of communities
      */
-    @GetMapping(value = "", params = { "page", "size" })
+    @GetMapping(value = "", params = {"page", "size"})
     public Page<CommunityDto> getCommunities(@RequestParam("page") int page,
                                              @RequestParam("size") int size) {
         return communityService.getCommunities(page, size);
@@ -55,6 +57,7 @@ public class CommunityController {
 
     /**
      * Get a specific community by id
+     *
      * @param id id of the community
      * @return Community if it exists
      */
@@ -78,12 +81,13 @@ public class CommunityController {
 
     /**
      * Get all ratings linked to a community
-     * @param id id of the community
+     *
+     * @param id   id of the community
      * @param page page index
      * @param size number of ratings per page
      * @return Page of ratings
      */
-    @GetMapping(value = "/{id}/ratings", params = { "page", "size" })
+    @GetMapping(value = "/{id}/ratings", params = {"page", "size"})
     public Page<RatingDto> getCommunityRatings(@PathVariable("id") Long id, @RequestParam("page") int page,
                                                @RequestParam("size") int size) {
         return communityService.getCommunityRatings(id, page, size);
@@ -106,6 +110,7 @@ public class CommunityController {
 
     /**
      * Delete a community.
+     *
      * @param id id of the community to be deleted
      */
     @DeleteMapping(value = "/{id}")

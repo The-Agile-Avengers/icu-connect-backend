@@ -8,5 +8,6 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface InstructorMapper {
     InstructorDto toDto(Instructor instructor);
+
     Instructor fromDto(InstructorDto instructorDto);
 }

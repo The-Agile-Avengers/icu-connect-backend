@@ -9,5 +9,6 @@ import java.util.Optional;
 public interface InstructorRepository extends JpaRepository<Instructor, Long> {
     @Transactional()
     void deleteInstructorById(Long id);
+
     Optional<Instructor> findInstructorByName(String name);
 }

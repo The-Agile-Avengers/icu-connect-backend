@@ -9,5 +9,6 @@ import org.mapstruct.Mapper;
 public abstract class UserMapper {
 
     public abstract UserDto toDto(User user);
+
     public abstract User fromDto(UserDto userDto);
 }

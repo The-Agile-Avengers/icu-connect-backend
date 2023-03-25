@@ -9,5 +9,6 @@ import java.util.Optional;
 public interface CommunityRepository extends JpaRepository<Community, Long> {
     @Transactional()
     Long deleteCommunityById(Long id);
+
     Optional<Community> findCommunityByModuleId(String moduleId);
 }

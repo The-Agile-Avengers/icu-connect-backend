@@ -1,7 +1,11 @@
 package com.agileavengers.icuconnectbackend.config;
 
-import java.io.IOException;
-
+import com.agileavengers.icuconnectbackend.service.JwtUserDetailsService;
+import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,15 +14,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
 import static org.apache.logging.log4j.util.Strings.isEmpty;
-
-import com.agileavengers.icuconnectbackend.service.JwtUserDetailsService;
-
-import io.jsonwebtoken.ExpiredJwtException;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -31,7 +30,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-            FilterChain chain) throws ServletException, IOException {
+                                    FilterChain chain) throws ServletException, IOException {
 
 //        final String requestTokenHeader = request.getHeader("Authorization");
         String requestTokenHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -39,7 +38,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             chain.doFilter(request, response);
             return;
         }
-
 
 
         String name = null;

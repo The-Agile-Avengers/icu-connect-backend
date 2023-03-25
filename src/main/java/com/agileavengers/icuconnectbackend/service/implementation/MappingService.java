@@ -21,7 +21,7 @@ public class MappingService {
     }
 
     // TODO: Implement subscriber count
-    public Integer subscriberCount(Community community)  {
+    public Integer subscriberCount(Community community) {
         return userRepository.countAllBySubscriptionListContaining(community);
     }
 
@@ -31,6 +31,6 @@ public class MappingService {
     }
 
     public Integer getRatingThumbsUp(Rating rating) {
-        return rating.getThumbsUp().size();
+        return rating.getThumbsUp() != null ? rating.getThumbsUp().size() : 0;
     }
 }
