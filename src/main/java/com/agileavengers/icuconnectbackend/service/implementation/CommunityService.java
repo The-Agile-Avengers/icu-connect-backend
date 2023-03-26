@@ -111,13 +111,6 @@ public class CommunityService implements ICommunityService {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "entity not found");
     }
 
-    //    @Override
-    //    public Page<ReviewDto> getCommunityReviews(Long id, int page, int size) {
-    //        Pageable pageable = PageRequest.of(page, size);
-    //        Page<Review> reviewPage = reviewRepository.findAllByCommunity_Id(id, pageable);
-    //        return reviewPage.map(reviewMapper::toDto);
-    //    }
-
     @Override
     public Page<RatingDto> getCommunityRatings(Long id, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);

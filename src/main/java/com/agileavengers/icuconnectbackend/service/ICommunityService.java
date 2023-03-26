@@ -14,7 +14,6 @@ public interface ICommunityService {
 
     CommunityDto getCommunity(Long id);
 
-    //    Page<ReviewDto> getCommunityReviews(Long id, int page, int size);
     Page<RatingDto> getCommunityRatings(Long id, int page, int size);
 
     RatingDto createCommunityRating(Long id, RatingDto ratingDto, String username);
