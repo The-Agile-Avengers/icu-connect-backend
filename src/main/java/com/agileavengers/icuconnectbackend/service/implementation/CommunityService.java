@@ -40,12 +40,9 @@ public class CommunityService implements ICommunityService {
 
     @Autowired
     public CommunityService(CommunityRepository communityRepository,
-                            InstructorRepository instructorRepository,
-                            RatingRepository ratingRepository,
-                            UserRepository userRepository,
-                            CommunityMapper communityMapper,
-                            RatingMapper ratingMapper,
-                            InstructorMapper instructorMapper) {
+        InstructorRepository instructorRepository, RatingRepository ratingRepository,
+        UserRepository userRepository, CommunityMapper communityMapper, RatingMapper ratingMapper,
+        InstructorMapper instructorMapper) {
         this.communityRepository = communityRepository;
         this.instructorRepository = instructorRepository;
         this.ratingRepository = ratingRepository;
@@ -60,13 +57,16 @@ public class CommunityService implements ICommunityService {
         Instructor instructor = Instructor.builder().name("Anna King").build();
         instructor = instructorRepository.save(instructor);
 
-        Community community = Community.builder().name("Lecture 1").moduleId("UZH123").instructor(instructor).build();
+        Community community =
+            Community.builder().name("Lecture 1").moduleId("UZH123").instructor(instructor).build();
         community = communityRepository.save(community);
 
         User user = User.builder().username("Test").password("password").build();
         userRepository.save(user);
 
-        createCommunityRating(community.getId(), RatingDto.builder().teaching(3.0).content(2.5).workload(5.0).build(), user.getUsername());
+        createCommunityRating(community.getId(),
+            RatingDto.builder().teaching(3.0).content(2.5).workload(5.0).build(),
+            user.getUsername());
 
         return communityMapper.toDto(community);
     }
@@ -75,19 +75,20 @@ public class CommunityService implements ICommunityService {
     public CommunityDto createCommunity(CommunityDto communityDto) {
         Community community = new Community();
         if (communityDto.getModuleId() != null) {
-            if (communityRepository.findCommunityByModuleId(communityDto.getModuleId()).isPresent()) {
-                throw new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Module ID already exists"
-                );
+            if (communityRepository.findCommunityByModuleId(communityDto.getModuleId())
+                .isPresent()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Module ID already exists");
             }
             community.setModuleId(communityDto.getModuleId());
         }
         if (communityDto.getInstructor() != null) {
-            Optional<Instructor> instructor = instructorRepository.findInstructorByName(communityDto.getName());
+            Optional<Instructor> instructor =
+                instructorRepository.findInstructorByName(communityDto.getName());
             if (instructor.isPresent()) {
                 community.setInstructor(instructor.get());
             } else {
-                community.setInstructor(instructorRepository.save(instructorMapper.fromDto(communityDto.getInstructor())));
+                community.setInstructor(instructorRepository.save(
+                    instructorMapper.fromDto(communityDto.getInstructor())));
             }
         }
         community.setName(communityDto.getName());
@@ -107,17 +108,15 @@ public class CommunityService implements ICommunityService {
         if (communityOptional.isPresent()) {
             return communityMapper.toDto(communityOptional.get());
         }
-        throw new ResponseStatusException(
-                HttpStatus.NOT_FOUND, "entity not found"
-        );
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "entity not found");
     }
 
-//    @Override
-//    public Page<ReviewDto> getCommunityReviews(Long id, int page, int size) {
-//        Pageable pageable = PageRequest.of(page, size);
-//        Page<Review> reviewPage = reviewRepository.findAllByCommunity_Id(id, pageable);
-//        return reviewPage.map(reviewMapper::toDto);
-//    }
+    //    @Override
+    //    public Page<ReviewDto> getCommunityReviews(Long id, int page, int size) {
+    //        Pageable pageable = PageRequest.of(page, size);
+    //        Page<Review> reviewPage = reviewRepository.findAllByCommunity_Id(id, pageable);
+    //        return reviewPage.map(reviewMapper::toDto);
+    //    }
 
     @Override
     public Page<RatingDto> getCommunityRatings(Long id, int page, int size) {
@@ -130,24 +129,26 @@ public class CommunityService implements ICommunityService {
     public RatingDto createCommunityRating(Long id, RatingDto ratingDto, String username) {
         Optional<User> user = userRepository.findByUsername(username);
         if (user.isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "user does not exist"
-            );
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "user does not exist");
         }
-        if (ratingDto.getTeaching() == null || ratingDto.getContent() == null || ratingDto.getWorkload() == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "not all categories were rated"
-            );
+        Optional<Community> community = communityRepository.findById(id);
+        if (community.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community does not exist");
+        }
+        if (ratingDto.getTeaching() == null || ratingDto.getContent() == null
+            || ratingDto.getWorkload() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "not all categories were rated");
         }
         if (ratingDto.getTeaching() < 0.0 || ratingDto.getTeaching() > 5.0
-                || ratingDto.getWorkload() < 0.0 || ratingDto.getWorkload() > 5.0
-                || ratingDto.getContent() < 0.0 || ratingDto.getContent() > 5.0
-        ) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "ratings are not within range"
-            );
+            || ratingDto.getWorkload() < 0.0 || ratingDto.getWorkload() > 5.0
+            || ratingDto.getContent() < 0.0 || ratingDto.getContent() > 5.0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "ratings are not within range");
         }
+
         Rating rating = ratingMapper.fromDto(ratingDto);
+        rating.setCommunity(community.get());
         rating.setCreator(user.get());
 
         return ratingMapper.toDto(ratingRepository.save(rating));
@@ -166,9 +167,7 @@ public class CommunityService implements ICommunityService {
         if (communityRepository.existsById(id)) {
             communityRepository.deleteCommunityById(id);
         } else {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "entity not found"
-            );
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "entity not found");
         }
     }
 }
