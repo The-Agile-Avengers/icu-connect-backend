@@ -2,7 +2,6 @@ package com.agileavengers.icuconnectbackend.service;
 
 import static org.junit.gen5.api.Assertions.assertEquals;
 import static org.junit.gen5.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -20,12 +19,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.agileavengers.icuconnectbackend.IcuConnectBackendApplication;
 import com.agileavengers.icuconnectbackend.mapper.UserMapper;
 import com.agileavengers.icuconnectbackend.model.User;
+import com.agileavengers.icuconnectbackend.model.dto.JwtRequestDto;
 import com.agileavengers.icuconnectbackend.model.dto.RegisterUserDto;
 import com.agileavengers.icuconnectbackend.repository.UserRepository;
 
@@ -52,12 +54,34 @@ public class JwtUserDetailsServiceTest {
                 .id(1L)
                 .username("TestUsername")
                 .email("test@testmail.com")
+                .password("password")
                 .build();
     }
 
     @Test
-    void testLoadUserByUsername() {
+    void loadUserByUsername() {
+        JwtRequestDto jwtRequestDto = new JwtRequestDto("TestUsername", "password");
 
+        doReturn(Optional.of(user)).when(userRepository).findByUsername(jwtRequestDto.getUsername());
+
+        UserDetails userDetails = jwtUserDetailsService.loadUserByUsername(jwtRequestDto.getUsername());
+
+        assertEquals(userDetails.getUsername(), user.getUsername());
+        assertEquals(userDetails.getPassword(), user.getPassword());
+    }
+
+    @Test
+    void loadUserByUsernameThrowsException() {
+        JwtRequestDto jwtRequestDto = new JwtRequestDto("TestUsername", "password");
+
+        doReturn(Optional.empty()).when(userRepository).findByUsername(jwtRequestDto.getUsername());
+
+        UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () -> {
+            jwtUserDetailsService.loadUserByUsername(jwtRequestDto.getUsername());
+        }, "UsernameNotFoundException was expected to be thrown.");
+
+        assertEquals("User not found with username: " + user.getUsername(),
+                exception.getMessage());
     }
 
     @Test
