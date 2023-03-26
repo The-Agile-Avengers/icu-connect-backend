@@ -83,7 +83,7 @@ public class CommunityService implements ICommunityService {
         }
         if (communityDto.getInstructor() != null) {
             Optional<Instructor> instructor =
-                instructorRepository.findInstructorByName(communityDto.getName());
+                instructorRepository.findInstructorByName(communityDto.getInstructor().getName());
             if (instructor.isPresent()) {
                 community.setInstructor(instructor.get());
             } else {
