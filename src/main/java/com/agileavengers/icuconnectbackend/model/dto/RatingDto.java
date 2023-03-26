@@ -13,7 +13,7 @@ public class RatingDto {
 
     private Long id;
 
-    private CommunityDto communityDto;
+    private CommunityDto community;
 
     private Double teaching;
     private Double content;

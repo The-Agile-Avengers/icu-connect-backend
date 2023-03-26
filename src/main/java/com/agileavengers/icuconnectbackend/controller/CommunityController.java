@@ -51,7 +51,7 @@ public class CommunityController {
      */
     @GetMapping(value = "", params = {"page", "size"})
     public Page<CommunityDto> getCommunities(@RequestParam("page") int page,
-                                             @RequestParam("size") int size) {
+        @RequestParam("size") int size) {
         return communityService.getCommunities(page, size);
     }
 
@@ -88,8 +88,8 @@ public class CommunityController {
      * @return Page of ratings
      */
     @GetMapping(value = "/{id}/ratings", params = {"page", "size"})
-    public Page<RatingDto> getCommunityRatings(@PathVariable("id") Long id, @RequestParam("page") int page,
-                                               @RequestParam("size") int size) {
+    public Page<RatingDto> getCommunityRatings(@PathVariable("id") Long id,
+        @RequestParam("page") int page, @RequestParam("size") int size) {
         return communityService.getCommunityRatings(id, page, size);
     }
 
@@ -102,9 +102,7 @@ public class CommunityController {
     public RatingDto rateCommunity(@PathVariable("id") Long id, @RequestBody RatingDto ratingDto) {
         // TODO: provide actual username
         UserDetails principal =
-                (UserDetails) SecurityContextHolder
-                        .getContext()
-                        .getAuthentication().getPrincipal();
+            (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return communityService.createCommunityRating(id, ratingDto, principal.getUsername());
     }
 

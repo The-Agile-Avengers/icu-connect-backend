@@ -77,7 +77,7 @@ public class CommunityService implements ICommunityService {
         if (communityDto.getModuleId() != null) {
             if (communityRepository.findCommunityByModuleId(communityDto.getModuleId())
                 .isPresent()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Module ID already exists");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Module ID already exists");
             }
             community.setModuleId(communityDto.getModuleId());
         }
