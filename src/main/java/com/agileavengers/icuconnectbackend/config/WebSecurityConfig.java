@@ -60,12 +60,10 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.cors().and().csrf().disable().exceptionHandling()
-                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-                .and().sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .authorizeHttpRequests().requestMatchers("/users").permitAll()
-                .requestMatchers("/login").permitAll().requestMatchers("/error").anonymous().anyRequest()
-                .authenticated();
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeHttpRequests()
+                .requestMatchers("/users").permitAll().requestMatchers("/login").permitAll().requestMatchers("/error")
+                .anonymous().anyRequest().authenticated();
 
         httpSecurity.authenticationProvider(authenticationProvider());
 

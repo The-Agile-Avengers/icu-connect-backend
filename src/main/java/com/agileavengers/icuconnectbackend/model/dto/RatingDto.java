@@ -1,12 +1,9 @@
 package com.agileavengers.icuconnectbackend.model.dto;
 
-import com.agileavengers.icuconnectbackend.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Set;
 
 @Data
 @Builder
@@ -16,7 +13,7 @@ public class RatingDto {
 
     private Long id;
 
-    private CommunityDto communityDto;
+    private CommunityDto community;
 
     private Double teaching;
     private Double content;
@@ -25,5 +22,5 @@ public class RatingDto {
 
     private String text;
 
-    private Set<User> thumbsUp;
+    private Integer thumbsUp;
 }

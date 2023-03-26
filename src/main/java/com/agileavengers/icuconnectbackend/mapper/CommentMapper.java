@@ -2,11 +2,11 @@ package com.agileavengers.icuconnectbackend.mapper;
 
 import com.agileavengers.icuconnectbackend.model.Comment;
 import com.agileavengers.icuconnectbackend.model.dto.CommentDto;
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring"
-)
+@Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public abstract class CommentMapper {
 
     public abstract CommentDto toDto(Comment comment);

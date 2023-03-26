@@ -9,9 +9,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @SpringBootApplication
 public class IcuConnectBackendApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(IcuConnectBackendApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(IcuConnectBackendApplication.class, args);
+    }
 
 	@Bean
     public WebMvcConfigurer corsConfigurer() {
