@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,8 +20,6 @@ import com.agileavengers.icuconnectbackend.repository.UserRepository;
 public class JwtUserDetailsService implements UserDetailsService {
 
 	private UserRepository userRepository;
-
-	private PasswordEncoder bcryptEncoder;
 
 	private final UserMapper userMapper;
 
@@ -53,7 +50,6 @@ public class JwtUserDetailsService implements UserDetailsService {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already taken.");
 		}
 		User newUser = userMapper.fromDto(registerUserDto);
-		// newUser.setPassword(bcryptEncoder.encode(user.getPassword()));
 		return userRepository.save(newUser);
 	}
 }

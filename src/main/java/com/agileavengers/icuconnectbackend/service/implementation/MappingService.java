@@ -1,12 +1,14 @@
 package com.agileavengers.icuconnectbackend.service.implementation;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.agileavengers.icuconnectbackend.model.Community;
 import com.agileavengers.icuconnectbackend.model.Rating;
 import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
 import com.agileavengers.icuconnectbackend.repository.RatingRepository;
 import com.agileavengers.icuconnectbackend.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class MappingService {
@@ -32,5 +34,9 @@ public class MappingService {
 
     public Integer getRatingThumbsUp(Rating rating) {
         return rating.getThumbsUp() != null ? rating.getThumbsUp().size() : 0;
+    }
+
+    public String encode(String password) {
+        return new BCryptPasswordEncoder().encode(password);
     }
 }
