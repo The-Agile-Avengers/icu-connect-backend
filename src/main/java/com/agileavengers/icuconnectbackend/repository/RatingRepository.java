@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RatingRepository extends JpaRepository<Rating, Long> {
 
@@ -22,4 +23,6 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
     Page<Rating> findAllByCommunity_Id(Long communityId, Pageable pageable);
 
     List<Rating> findAllByCommunity_Id(Long communityId);
+
+    Optional<Rating> findByCommunity_ModuleIdAndCreator_Id(String communityId, Long userId);
 }

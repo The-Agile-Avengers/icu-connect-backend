@@ -1,6 +1,7 @@
 package com.agileavengers.icuconnectbackend.controller;
 
 import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
+import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
 import com.agileavengers.icuconnectbackend.service.IUserService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,11 +19,11 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PutMapping(value = "/communities/{communityId}")
-    void updateCommunityRelation(@PathVariable(value = "communityId") Long communityId) {
+    @PutMapping(value = "/communities/{moduleId}")
+    void updateCommunityRelation(@PathVariable(value = "moduleId") String moduleId) {
         UserDetails principal =
                 (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        userService.updateCommunityRelation(principal.getUsername(), communityId);
+        userService.updateCommunityRelation(principal.getUsername(), moduleId);
 
     }
 
@@ -31,5 +32,12 @@ public class UserController {
         UserDetails principal =
                 (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userService.getJoinedCommunities(principal.getUsername());
+    }
+
+    @GetMapping(value = "/communities/{moduleId}/ratings")
+    RatingDto getCommunityRating(@PathVariable("moduleId") String moduleId) {
+        UserDetails principal =
+                (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userService.getCommunityRating(principal.getUsername(), moduleId);
     }
 }
