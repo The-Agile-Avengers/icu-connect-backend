@@ -37,6 +37,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.mockito.Mockito.*;
 
@@ -190,7 +191,7 @@ class ICommunityServiceTest {
         when(communityRepository.findById(1L))
                 .thenAnswer(i -> Optional.of(community));
 
-        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(List.of(community)).build();
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(Set.of(community)).build();
 
         User user2 = User.builder().username("Test2").password("anything").id(3L).build();
 
@@ -235,7 +236,7 @@ class ICommunityServiceTest {
         Instructor instructor = Instructor.builder().id(2L).name("Test Instructor").build();
         Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
 
-        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(List.of(community)).build();
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(Set.of(community)).build();
 
         User user2 = User.builder().username("Test2").password("anything").id(3L).build();
 
@@ -268,7 +269,7 @@ class ICommunityServiceTest {
             .thenAnswer(i -> Optional.of(community));
 
 
-        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(List.of(community)).build();
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(Set.of(community)).build();
 
         when(userRepository.findByUsername(user1.getUsername())).thenAnswer(i -> Optional.of(user1));
 
@@ -300,7 +301,7 @@ class ICommunityServiceTest {
         Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
 
 
-        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(List.of(community)).build();
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(Set.of(community)).build();
 
         when(userRepository.findByUsername(user1.getUsername())).thenAnswer(i -> Optional.empty());
 
@@ -319,7 +320,7 @@ class ICommunityServiceTest {
         when(communityRepository.findById(1L))
             .thenAnswer(i -> Optional.empty());
 
-        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(List.of(community)).build();
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(Set.of(community)).build();
 
         when(userRepository.findByUsername(user1.getUsername())).thenAnswer(i -> Optional.of(user1));
 
@@ -338,7 +339,7 @@ class ICommunityServiceTest {
         when(communityRepository.findById(1L))
             .thenAnswer(i -> Optional.of(community));
 
-        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(List.of(community)).build();
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(Set.of(community)).build();
 
         when(userRepository.findByUsername(user1.getUsername())).thenAnswer(i -> Optional.of(user1));
 

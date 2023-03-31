@@ -1,0 +1,35 @@
+package com.agileavengers.icuconnectbackend.controller;
+
+import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
+import com.agileavengers.icuconnectbackend.service.IUserService;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
+
+@RestController
+@RequestMapping("/users")
+public class UserController {
+
+    IUserService userService;
+
+    public UserController(IUserService userService) {
+        this.userService = userService;
+    }
+
+    @PutMapping(value = "/communities/{communityId}")
+    void updateCommunityRelation(@PathVariable(value = "communityId") Long communityId) {
+        UserDetails principal =
+                (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        userService.updateCommunityRelation(principal.getUsername(), communityId);
+
+    }
+
+    @GetMapping(value = "/communities")
+    Set<CommunityDto> getJoinedCommunities() {
+        UserDetails principal =
+                (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userService.getJoinedCommunities(principal.getUsername());
+    }
+}

@@ -11,4 +11,5 @@ public interface CommunityRepository extends JpaRepository<Community, Long> {
     Long deleteCommunityById(Long id);
 
     Optional<Community> findCommunityByModuleId(String moduleId);
+    Optional<Community> findCommunityById(Long communityId);
 }

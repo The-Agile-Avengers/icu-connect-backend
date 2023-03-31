@@ -6,8 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Data
@@ -27,6 +27,6 @@ public class User {
     private String password;
 
     @ManyToMany()
-    private List<Community> subscriptionList = new ArrayList<>();
+    private Set<Community> subscriptionList = new HashSet<>();
 
 }
