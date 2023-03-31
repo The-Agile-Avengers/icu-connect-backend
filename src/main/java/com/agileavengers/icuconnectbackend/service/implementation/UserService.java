@@ -91,4 +91,19 @@ public class UserService implements IUserService {
         Optional<Rating> rating = ratingRepository.findByCommunity_ModuleIdAndCreator_Id(moduleId, user.getId());
         return rating.map(ratingMapper::toDto).orElse(null);
     }
+
+    @Override
+    public RatingDto getCommunityRating(String username, String moduleId) {
+        Optional<User> optUser = userRepository.findByUsername(username);
+        if (optUser.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User does not exist");
+        }
+        User user = optUser.get();
+        Optional<Community> optCommunity = communityRepository.findCommunityByModuleId(moduleId);
+        if (optCommunity.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Community does not exist");
+        }
+        Optional<Rating> rating = ratingRepository.findByCommunity_ModuleIdAndCreator_Id(moduleId, user.getId());
+        return rating.map(ratingMapper::toDto).orElse(null);
+    }
 }
