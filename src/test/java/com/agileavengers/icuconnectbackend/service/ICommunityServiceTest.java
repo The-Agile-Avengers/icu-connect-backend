@@ -33,8 +33,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,6 +82,17 @@ class ICommunityServiceTest {
 //
 //    private InstructorMapper instructorMapper;
 
+    void setupSecurity(User user) {
+        when(userRepository.findByUsername(user.getUsername())).thenAnswer(i -> Optional.of(user));
+
+        Authentication authentication = mock(Authentication.class);
+        // Mockito.whens() for your authorization object
+        when(authentication.getPrincipal()).thenReturn(new org.springframework.security.core.userdetails.User(user.getUsername(),
+                user.getPassword(), new ArrayList<>()));
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+    }
 
     @BeforeEach
     void setup() {
@@ -103,6 +118,8 @@ class ICommunityServiceTest {
 
     @Test
     void createCommunityNewInstructor() {
+
+        setupSecurity(User.builder().username("test1").password("pw").build());
 
         when(instructorRepository.save(Mockito.any(Instructor.class)))
                 .thenAnswer(i -> {
@@ -131,6 +148,7 @@ class ICommunityServiceTest {
         Assertions.assertNull(output.getRating().getWorkload(), "The ratings should be null, since no one has rated yet.");
         Assertions.assertEquals(communityDto.getModuleId(), output.getModuleId(), "The module ID should be set.");
         Assertions.assertEquals(communityDto.getName(), output.getName(), "The name should be set.");
+        Assertions.assertFalse(output.getJoined(), "User should not have joined yet.");
 
     }
 
@@ -140,6 +158,8 @@ class ICommunityServiceTest {
 
         Instructor instructor = Instructor.builder().name("Test Instructor").build();
         Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
+        User user = User.builder().username("test1").password("pw").subscriptionList(List.of(community)).build();
+        setupSecurity(user);
         List<Community> communityList = List.of(community);
         when(communityRepository.findAll(Mockito.any(Pageable.class)))
                 .thenAnswer(i -> {
@@ -156,14 +176,15 @@ class ICommunityServiceTest {
         CommunityDto resultCommunity = result.getContent().get(0);
         Assertions.assertEquals(community.getName(), resultCommunity.getName(), "Name should be equal to prepared community");
         Assertions.assertEquals(community.getModuleId(), resultCommunity.getModuleId(), "ModuleId should be equal to prepared community");
-        Assertions.assertEquals(community.getId(), resultCommunity.getId(), "Id should be equal to prepared community");
         Assertions.assertNotNull(resultCommunity.getInstructor(), "Instructor should be set");
+        Assertions.assertTrue(resultCommunity.getJoined(), "User should have joined the community");
 
     }
 
     @Test
     void getCommunitiesMultiple() {
 
+        setupSecurity(User.builder().username("test1").password("pw").build());
 
         Instructor instructor = Instructor.builder().name("Test Instructor").build();
         Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
@@ -187,22 +208,22 @@ class ICommunityServiceTest {
     void getCommunity() {
         Instructor instructor = Instructor.builder().id(10L).name("Test Instructor").build();
         Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
-        when(communityRepository.findById(1L))
+        when(communityRepository.findCommunityByModuleId(community.getModuleId()))
                 .thenAnswer(i -> Optional.of(community));
 
         User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(List.of(community)).build();
-
+        setupSecurity(user1);
         User user2 = User.builder().username("Test2").password("anything").id(3L).build();
 
         when(userRepository.countAllBySubscriptionListContaining(community))
                 .thenAnswer(i -> 1);
 
-        Rating rating = Rating.builder().creator(user1).community(community).content(4).workload(3).teaching(1).build();
-        Rating rating2 = Rating.builder().creator(user2).community(community).content(5).workload(2).teaching(4).build();
-        when(ratingRepository.findAllByCommunity_Id(1L))
+        Rating rating = Rating.builder().creator(user1).community(community).content(4.0).workload(3.0).teaching(1.0).build();
+        Rating rating2 = Rating.builder().creator(user2).community(community).content(5.0).workload(2.0).teaching(4.0).build();
+        when(ratingRepository.findAllByCommunity_ModuleId(community.getModuleId()))
                 .thenAnswer(i -> List.of(rating, rating2));
 
-        CommunityDto result = communityService.getCommunity(1L);
+        CommunityDto result = communityService.getCommunity(community.getModuleId());
 
         Assertions.assertNotNull(result, "Result should not be null.");
         Assertions.assertEquals(community.getModuleId(), result.getModuleId(), "Result should have same module id.");
@@ -221,11 +242,11 @@ class ICommunityServiceTest {
     void getCommunityEmpty() {
 //        Instructor instructor = Instructor.builder().name("Test Instructor").build();
 //        Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
-        when(communityRepository.findById(2L))
+        when(communityRepository.findCommunityByModuleId("noExist"))
                 .thenAnswer(i -> Optional.empty());
 
         try {
-            communityService.getCommunity(2L);
+            communityService.getCommunity("noExist");
             Assertions.fail("Community does not exist. Should throw an error");
         } catch (Exception ignore) {}
     }
@@ -234,24 +255,27 @@ class ICommunityServiceTest {
     void getCommunityRatings() {
         Instructor instructor = Instructor.builder().id(2L).name("Test Instructor").build();
         Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
+        when(communityRepository.findCommunityByModuleId(community.getModuleId()))
+                .thenAnswer(i -> Optional.of(community));
 
         User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(List.of(community)).build();
+        setupSecurity(user1);
 
         User user2 = User.builder().username("Test2").password("anything").id(3L).build();
 
-        Rating rating = Rating.builder().creator(user1).community(community).content(4).workload(3).teaching(1).build();
-        Rating rating2 = Rating.builder().creator(user2).community(community).content(5).workload(2).teaching(4).build();
+        Rating rating = Rating.builder().creator(user1).community(community).content(4.0).workload(3.0).teaching(1.0).build();
+        Rating rating2 = Rating.builder().creator(user2).community(community).content(5.0).workload(2.0).teaching(4.0).build();
         List<Rating> ratingList = List.of(rating, rating2);
 
-        Pageable pageable = PageRequest.of(0,1);
+        Pageable pageable = PageRequest.of(0, 1);
 
-        when(ratingRepository.findAllByCommunity_Id(1L, pageable))
+        when(ratingRepository.findAllByCommunity_ModuleId(community.getModuleId(), pageable))
                 .thenAnswer(i -> {
                     Pageable argument = (Pageable) i.getArguments()[1];
                     return new PageImpl<>(ratingList.subList(argument.getPageNumber(), argument.getPageSize()), argument, ratingList.size());
                 });
 
-        Page<RatingDto> result = communityService.getCommunityRatings(community.getId(), pageable.getPageNumber(), pageable.getPageSize());
+        Page<RatingDto> result = communityService.getCommunityRatings(community.getModuleId(), pageable.getPageNumber(), pageable.getPageSize());
 
         Assertions.assertNotNull(result, "Page should not be null");
         Assertions.assertEquals(2L, result.getTotalElements(), "Result should contain two elements.");
@@ -264,7 +288,7 @@ class ICommunityServiceTest {
     void createCommunityRating() {
         Instructor instructor = Instructor.builder().id(10L).name("Test Instructor").build();
         Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
-        when(communityRepository.findById(1L))
+        when(communityRepository.findCommunityByModuleId(community.getModuleId()))
             .thenAnswer(i -> Optional.of(community));
 
 
@@ -281,15 +305,40 @@ class ICommunityServiceTest {
 
         RatingDto rating = RatingDto.builder().workload(3.0).content(1.0).teaching(5.0).text("Average course").build();
 
-        RatingDto result = communityService.createCommunityRating(community.getId(), rating, user1.getUsername());
+        RatingDto result = communityService.createCommunityRating(community.getModuleId(), rating, user1.getUsername());
 
         Assertions.assertNotNull(result, "Returned object should not be null");
         Assertions.assertEquals(rating.getContent(), result.getContent(), "Fields should not have changed");
         Assertions.assertEquals(rating.getTeaching(), result.getTeaching(), "Fields should not have changed");
         Assertions.assertEquals(rating.getWorkload(), result.getWorkload(), "Fields should not have changed");
-        Assertions.assertEquals(community.getId(), result.getCommunity().getId(), "Fields should not have changed");
         Assertions.assertEquals(0, result.getThumbsUp(), "Thumbs up should be 0");
         Assertions.assertNotNull(result.getId(), "Id should nto be null");
+
+
+    }
+
+    @Test
+    void createCommunityRatingDouble() {
+        Instructor instructor = Instructor.builder().id(10L).name("Test Instructor").build();
+        Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
+        when(communityRepository.findCommunityByModuleId(community.getModuleId()))
+                .thenAnswer(i -> Optional.of(community));
+
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(List.of(community)).build();
+        Rating rating = Rating.builder().creator(user1).workload(3.0).content(1.0).teaching(5.0).text("Average course").community(community).build();
+
+
+        when(userRepository.findByUsername(user1.getUsername())).thenAnswer(i -> Optional.of(user1));
+
+        when(ratingRepository.findByCommunity_ModuleIdAndCreator_Id(community.getModuleId(), user1.getId())).thenReturn(Optional.of(rating));
+
+        RatingDto ratingDto = RatingDto.builder().workload(3.0).content(1.0).teaching(5.0).text("Average course").build();
+
+        try {
+            communityService.createCommunityRating(community.getModuleId(), ratingDto, user1.getUsername());
+            Assertions.fail("Double rating creatio should not be possible.");
+        } catch (Exception ignored) {
+        }
 
 
     }
@@ -307,7 +356,7 @@ class ICommunityServiceTest {
         RatingDto rating = RatingDto.builder().workload(3.0).content(1.0).teaching(5.0).text("Average course").build();
 
         try {
-            communityService.createCommunityRating(community.getId(), rating, user1.getUsername());
+            communityService.createCommunityRating(community.getModuleId(), rating, user1.getUsername());
             Assertions.fail("User does not exist and error should be thrown");
         } catch (Exception ignore) {}
     }
@@ -316,7 +365,7 @@ class ICommunityServiceTest {
     void createCommunityRatingNoCommunity() {
         Instructor instructor = Instructor.builder().id(10L).name("Test Instructor").build();
         Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
-        when(communityRepository.findById(1L))
+        when(communityRepository.findCommunityByModuleId(community.getModuleId()))
             .thenAnswer(i -> Optional.empty());
 
         User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(List.of(community)).build();
@@ -326,7 +375,7 @@ class ICommunityServiceTest {
         RatingDto rating = RatingDto.builder().workload(3.0).content(1.0).teaching(5.0).text("Average course").build();
 
         try {
-            communityService.createCommunityRating(community.getId(), rating, user1.getUsername());
+            communityService.createCommunityRating(community.getModuleId(), rating, user1.getUsername());
             Assertions.fail("Community does not exist and error should be thrown");
         } catch (Exception ignore) {}
     }
@@ -335,7 +384,7 @@ class ICommunityServiceTest {
     void createCommunityRatingWrongRange() {
         Instructor instructor = Instructor.builder().id(10L).name("Test Instructor").build();
         Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
-        when(communityRepository.findById(1L))
+        when(communityRepository.findCommunityByModuleId(community.getModuleId()))
             .thenAnswer(i -> Optional.of(community));
 
         User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(List.of(community)).build();
@@ -345,7 +394,7 @@ class ICommunityServiceTest {
         RatingDto rating = RatingDto.builder().workload(-3.0).content(1.0).teaching(5.0).text("Average course").build();
 
         try {
-            communityService.createCommunityRating(community.getId(), rating, user1.getUsername());
+            communityService.createCommunityRating(community.getModuleId(), rating, user1.getUsername());
             Assertions.fail("Rating workload is out of range and error should be thrown");
         } catch (Exception ignore) {}
     }

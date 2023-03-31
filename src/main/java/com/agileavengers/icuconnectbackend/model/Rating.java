@@ -24,9 +24,9 @@ public class Rating {
 
     @ManyToOne
     private Community community;
-    private Integer teaching;
-    private Integer content;
-    private Integer workload;
+    private Double teaching;
+    private Double content;
+    private Double workload;
 
     private String text;
 

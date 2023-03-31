@@ -12,13 +12,13 @@ public interface ICommunityService {
 
     Page<CommunityDto> getCommunities(int page, int size);
 
-    CommunityDto getCommunity(Long id);
+    CommunityDto getCommunity(String moduleId);
 
-    Page<RatingDto> getCommunityRatings(Long id, int page, int size);
+    Page<RatingDto> getCommunityRatings(String moduleId, int page, int size);
 
-    RatingDto createCommunityRating(Long id, RatingDto ratingDto, String username);
+    RatingDto createCommunityRating(String moduleId, RatingDto ratingDto, String username);
 
-    RatingAverage getCommunityRatingAverage(Long id);
+    RatingAverage getCommunityRatingAverage(String moduleId);
 
-    void deleteCommunity(long id);
+    void deleteCommunity(String moduleId);
 }
