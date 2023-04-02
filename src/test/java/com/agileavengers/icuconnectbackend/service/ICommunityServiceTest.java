@@ -45,11 +45,6 @@ import java.util.Optional;
 import static org.mockito.Mockito.*;
 
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
-//@SpringBootTest(classes = {CommunityMapperImpl.class, RatingMapperImpl.class, InstructorMapperImpl.class})
-//@ContextConfiguration(classes = { CommunityMapperImpl.class, RatingMapperImpl.class, InstructorMapperImpl.class,
-//        UserRepository.class, CommunityRepository.class, InstructorRepository.class, RatingRepository.class
-//
-//})
 @SpringBootTest()
 @ComponentScan(basePackageClasses = IcuConnectBackendApplication.class)
 class ICommunityServiceTest {
@@ -64,23 +59,6 @@ class ICommunityServiceTest {
     RatingRepository ratingRepository;
     @Mock
     UserRepository userRepository;
-
-//    private CommunityMapper communityMapper
-//            = Mappers.getMapper(CommunityMapper.class);
-//    private ReviewMapper reviewMapper
-//            = Mappers.getMapper(ReviewMapper.class);
-//    private RatingMapper ratingMapper
-//            = Mappers.getMapper(RatingMapper.class);
-//    private InstructorMapper instructorMapper
-//            = Mappers.getMapper(InstructorMapper.class);
-
-//    private MappingService mappingService;
-//
-//    private CommunityMapper communityMapper;
-//
-//    private RatingMapper ratingMapper;
-//
-//    private InstructorMapper instructorMapper;
 
     void setupSecurity(User user) {
         when(userRepository.findByUsername(user.getUsername())).thenAnswer(i -> Optional.of(user));
@@ -240,8 +218,6 @@ class ICommunityServiceTest {
 
     @Test
     void getCommunityEmpty() {
-//        Instructor instructor = Instructor.builder().name("Test Instructor").build();
-//        Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
         when(communityRepository.findCommunityByModuleId("noExist"))
                 .thenAnswer(i -> Optional.empty());
 
