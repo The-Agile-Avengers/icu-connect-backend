@@ -1,16 +1,10 @@
 package com.agileavengers.icuconnectbackend.service;
 
-import static org.junit.gen5.api.Assertions.assertEquals;
-import static org.junit.gen5.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.Optional;
-
+import com.agileavengers.icuconnectbackend.mapper.UserMapper;
+import com.agileavengers.icuconnectbackend.model.User;
+import com.agileavengers.icuconnectbackend.model.dto.JwtRequestDto;
+import com.agileavengers.icuconnectbackend.model.dto.RegisterUserDto;
+import com.agileavengers.icuconnectbackend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,22 +12,23 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.agileavengers.icuconnectbackend.IcuConnectBackendApplication;
-import com.agileavengers.icuconnectbackend.mapper.UserMapper;
-import com.agileavengers.icuconnectbackend.model.User;
-import com.agileavengers.icuconnectbackend.model.dto.JwtRequestDto;
-import com.agileavengers.icuconnectbackend.model.dto.RegisterUserDto;
-import com.agileavengers.icuconnectbackend.repository.UserRepository;
+import java.util.Optional;
+
+import static org.junit.gen5.api.Assertions.assertEquals;
+import static org.junit.gen5.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest()
 @ExtendWith({ SpringExtension.class, MockitoExtension.class })
-@ComponentScan(basePackageClasses = IcuConnectBackendApplication.class)
+//@ComponentScan(basePackageClasses = IcuConnectBackendApplication.class)
 public class JwtUserDetailsServiceTest {
     @Mock
     private UserRepository userRepository;

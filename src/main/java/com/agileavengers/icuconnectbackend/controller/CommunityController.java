@@ -58,12 +58,12 @@ public class CommunityController {
     /**
      * Get a specific community by id
      *
-     * @param id id of the community
+     * @param moduleId of the community
      * @return Community if it exists
      */
-    @GetMapping(value = "/{id}")
-    public CommunityDto getCommunity(@PathVariable("id") Long id) {
-        return communityService.getCommunity(id);
+    @GetMapping(value = "/{moduleId}")
+    public CommunityDto getCommunity(@PathVariable("moduleId") String moduleId) {
+        return communityService.getCommunity(moduleId);
     }
 
 //    /**
@@ -82,38 +82,38 @@ public class CommunityController {
     /**
      * Get all ratings linked to a community
      *
-     * @param id   id of the community
-     * @param page page index
-     * @param size number of ratings per page
+     * @param moduleId of the community
+     * @param page     page index
+     * @param size     number of ratings per page
      * @return Page of ratings
      */
-    @GetMapping(value = "/{id}/ratings", params = {"page", "size"})
-    public Page<RatingDto> getCommunityRatings(@PathVariable("id") Long id,
-        @RequestParam("page") int page, @RequestParam("size") int size) {
-        return communityService.getCommunityRatings(id, page, size);
+    @GetMapping(value = "/{moduleId}/ratings", params = {"page", "size"})
+    public Page<RatingDto> getCommunityRatings(@PathVariable("moduleId") String moduleId,
+                                               @RequestParam("page") int page, @RequestParam("size") int size) {
+        return communityService.getCommunityRatings(moduleId, page, size);
     }
 
-    @GetMapping(value = "/{id}/ratings/average")
-    public RatingAverage getCommunityRatingAverage(@PathVariable("id") Long id) {
-        return communityService.getCommunityRatingAverage(id);
+    @GetMapping(value = "/{moduleId}/ratings/average")
+    public RatingAverage getCommunityRatingAverage(@PathVariable("moduleId") String moduleId) {
+        return communityService.getCommunityRatingAverage(moduleId);
     }
 
-    @PostMapping(value = "/{id}/ratings")
-    public RatingDto rateCommunity(@PathVariable("id") Long id, @RequestBody RatingDto ratingDto) {
+    @PostMapping(value = "/{moduleId}/ratings")
+    public RatingDto rateCommunity(@PathVariable("moduleId") String moduleId, @RequestBody RatingDto ratingDto) {
         // TODO: provide actual username
         UserDetails principal =
-            (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return communityService.createCommunityRating(id, ratingDto, principal.getUsername());
+                (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return communityService.createCommunityRating(moduleId, ratingDto, principal.getUsername());
     }
 
     /**
      * Delete a community.
      *
-     * @param id id of the community to be deleted
+     * @param moduleId of the community to be deleted
      */
-    @DeleteMapping(value = "/{id}")
-    public void deleteCommunity(@PathVariable("id") Long id) {
+    @DeleteMapping(value = "/{moduleId}")
+    public void deleteCommunity(@PathVariable("moduleId") String moduleId) {
         //TODO: only allowed with specific rights. might be removed for production
-        communityService.deleteCommunity(id);
+        communityService.deleteCommunity(moduleId);
     }
 }
