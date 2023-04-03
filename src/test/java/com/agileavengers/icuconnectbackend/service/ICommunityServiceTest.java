@@ -111,7 +111,7 @@ class ICommunityServiceTest {
                     return argument;
                 });
         InstructorDto instructor = InstructorDto.builder().name("Test Instructor").build();
-        CommunityDto communityDto = CommunityDto.builder().name("Test Community").instructor(instructor).moduleId("UZH1234").build();
+        CommunityDto communityDto = CommunityDto.builder().name("Test Community").instructor(instructor).ects(6.0).moduleId("UZH1234").build();
         CommunityDto output = communityService.createCommunity(communityDto);
         verify(communityRepository, times(1)).save(argThat(
                 x -> true ));
@@ -125,6 +125,7 @@ class ICommunityServiceTest {
         Assertions.assertNull(output.getRating().getWorkload(), "The ratings should be null, since no one has rated yet.");
         Assertions.assertEquals(communityDto.getModuleId(), output.getModuleId(), "The module ID should be set.");
         Assertions.assertEquals(communityDto.getName(), output.getName(), "The name should be set.");
+        Assertions.assertEquals(communityDto.getEcts(), output.getEcts(), "ECTS should be set.");
         Assertions.assertFalse(output.getJoined(), "User should not have joined yet.");
 
     }
