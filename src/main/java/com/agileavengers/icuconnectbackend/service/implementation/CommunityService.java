@@ -1,30 +1,37 @@
 package com.agileavengers.icuconnectbackend.service.implementation;
 
-import com.agileavengers.icuconnectbackend.mapper.CommunityMapper;
-import com.agileavengers.icuconnectbackend.mapper.InstructorMapper;
-import com.agileavengers.icuconnectbackend.mapper.RatingMapper;
-import com.agileavengers.icuconnectbackend.model.Community;
-import com.agileavengers.icuconnectbackend.model.Instructor;
-import com.agileavengers.icuconnectbackend.model.Rating;
-import com.agileavengers.icuconnectbackend.model.User;
-import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
-import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
-import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
-import com.agileavengers.icuconnectbackend.repository.CommunityRepository;
-import com.agileavengers.icuconnectbackend.repository.InstructorRepository;
-import com.agileavengers.icuconnectbackend.repository.RatingRepository;
-import com.agileavengers.icuconnectbackend.repository.UserRepository;
-import com.agileavengers.icuconnectbackend.service.ICommunityService;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Optional;
+import com.agileavengers.icuconnectbackend.mapper.CommunityMapper;
+import com.agileavengers.icuconnectbackend.mapper.InstructorMapper;
+import com.agileavengers.icuconnectbackend.mapper.PostMapper;
+import com.agileavengers.icuconnectbackend.mapper.RatingMapper;
+import com.agileavengers.icuconnectbackend.model.Community;
+import com.agileavengers.icuconnectbackend.model.Instructor;
+import com.agileavengers.icuconnectbackend.model.Post;
+import com.agileavengers.icuconnectbackend.model.Rating;
+import com.agileavengers.icuconnectbackend.model.User;
+import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
+import com.agileavengers.icuconnectbackend.model.dto.PostDto;
+import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
+import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
+import com.agileavengers.icuconnectbackend.repository.CommunityRepository;
+import com.agileavengers.icuconnectbackend.repository.InstructorRepository;
+import com.agileavengers.icuconnectbackend.repository.PostRepository;
+import com.agileavengers.icuconnectbackend.repository.RatingRepository;
+import com.agileavengers.icuconnectbackend.repository.UserRepository;
+import com.agileavengers.icuconnectbackend.service.ICommunityService;
 
 @Service
 public class CommunityService implements ICommunityService {
@@ -32,17 +39,18 @@ public class CommunityService implements ICommunityService {
     private final CommunityMapper communityMapper;
     private final RatingMapper ratingMapper;
     private final InstructorMapper instructorMapper;
+    private final PostMapper postMapper;
+    PostRepository postRepository;
     CommunityRepository communityRepository;
     InstructorRepository instructorRepository;
     RatingRepository ratingRepository;
     UserRepository userRepository;
 
-
     @Autowired
     public CommunityService(CommunityRepository communityRepository,
-        InstructorRepository instructorRepository, RatingRepository ratingRepository,
-        UserRepository userRepository, CommunityMapper communityMapper, RatingMapper ratingMapper,
-        InstructorMapper instructorMapper) {
+            InstructorRepository instructorRepository, RatingRepository ratingRepository,
+            UserRepository userRepository, CommunityMapper communityMapper, RatingMapper ratingMapper,
+            InstructorMapper instructorMapper, PostRepository postRepository, PostMapper postMapper) {
         this.communityRepository = communityRepository;
         this.instructorRepository = instructorRepository;
         this.ratingRepository = ratingRepository;
@@ -50,6 +58,8 @@ public class CommunityService implements ICommunityService {
         this.communityMapper = communityMapper;
         this.ratingMapper = ratingMapper;
         this.instructorMapper = instructorMapper;
+        this.postRepository = postRepository;
+        this.postMapper = postMapper;
     }
 
     @Override
@@ -57,8 +67,7 @@ public class CommunityService implements ICommunityService {
         Instructor instructor = Instructor.builder().name("Anna King").build();
         instructor = instructorRepository.save(instructor);
 
-        Community community =
-            Community.builder().name("Lecture 1").moduleId("UZH123").instructor(instructor).build();
+        Community community = Community.builder().name("Lecture 1").moduleId("UZH123").instructor(instructor).build();
         community = communityRepository.save(community);
 
         User user = User.builder().username("Test").password("password").build();
@@ -76,19 +85,19 @@ public class CommunityService implements ICommunityService {
         Community community = new Community();
         if (communityDto.getModuleId() != null) {
             if (communityRepository.findCommunityByModuleId(communityDto.getModuleId())
-                .isPresent()) {
+                    .isPresent()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Module ID already exists");
             }
             community.setModuleId(communityDto.getModuleId());
         }
         if (communityDto.getInstructor() != null) {
-            Optional<Instructor> instructor =
-                instructorRepository.findInstructorByName(communityDto.getInstructor().getName());
+            Optional<Instructor> instructor = instructorRepository
+                    .findInstructorByName(communityDto.getInstructor().getName());
             if (instructor.isPresent()) {
                 community.setInstructor(instructor.get());
             } else {
                 community.setInstructor(instructorRepository.save(
-                    instructorMapper.fromDto(communityDto.getInstructor())));
+                        instructorMapper.fromDto(communityDto.getInstructor())));
             }
         }
         community.setName(communityDto.getName());
@@ -133,7 +142,8 @@ public class CommunityService implements ICommunityService {
         if (community.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community does not exist");
         }
-        if (ratingRepository.findByCommunity_ModuleIdAndCreator_Id(community.get().getModuleId(), user.get().getId()).isPresent()) {
+        if (ratingRepository.findByCommunity_ModuleIdAndCreator_Id(community.get().getModuleId(), user.get().getId())
+                .isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User has already rated this community");
         }
         if (ratingDto.getTeaching() == null || ratingDto.getContent() == null
@@ -170,5 +180,37 @@ public class CommunityService implements ICommunityService {
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "entity not found");
         }
+    }
+
+    @Override
+    public PostDto createPost(String moduleId, PostDto postDto, UserDetails userDetails) {
+        Optional<User> user = userRepository.findByUsername(userDetails.getUsername());
+        if (user.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "");
+        }
+        Optional<Community> community = communityRepository.findCommunityByModuleId(moduleId);
+        if (community.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community does not exist");
+        }
+
+        Post post = postMapper.fromDto(postDto);
+        post.setCreator(user.get());
+
+        post.setCreation(new Timestamp(System.currentTimeMillis()));
+
+        post.setCommunity(community.get());
+
+        return postMapper.toDto(postRepository.save(post));
+    }
+
+    @Override
+    public Page<PostDto> getCommunityPosts(String moduleId, int pageNumber, int size) {
+        Pageable page = PageRequest.of(pageNumber, size);
+        Optional<Community> community = communityRepository.findCommunityByModuleId(moduleId);
+        if (community.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community does not exist");
+        }
+        Page<Post> postPage = postRepository.findAllByCommunity_ModuleId(moduleId, page);
+        return postPage.map(postMapper::toDto);
     }
 }

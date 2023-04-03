@@ -2,6 +2,7 @@ package com.agileavengers.icuconnectbackend.service;
 
 import com.agileavengers.icuconnectbackend.mapper.CommunityMapper;
 import com.agileavengers.icuconnectbackend.mapper.InstructorMapper;
+import com.agileavengers.icuconnectbackend.mapper.PostMapper;
 import com.agileavengers.icuconnectbackend.mapper.RatingMapper;
 import com.agileavengers.icuconnectbackend.mapper.RatingMapperImpl;
 import com.agileavengers.icuconnectbackend.model.Community;
@@ -14,6 +15,7 @@ import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
 import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
 import com.agileavengers.icuconnectbackend.repository.CommunityRepository;
 import com.agileavengers.icuconnectbackend.repository.InstructorRepository;
+import com.agileavengers.icuconnectbackend.repository.PostRepository;
 import com.agileavengers.icuconnectbackend.repository.RatingRepository;
 import com.agileavengers.icuconnectbackend.repository.UserRepository;
 import com.agileavengers.icuconnectbackend.service.implementation.CommunityService;
@@ -57,6 +59,8 @@ class ICommunityServiceTest {
     RatingRepository ratingRepository;
     @Mock
     UserRepository userRepository;
+    @Mock
+    PostRepository postRepository;
 
     void setupSecurity(User user) {
         when(userRepository.findByUsername(user.getUsername())).thenAnswer(i -> Optional.of(user));
@@ -83,9 +87,10 @@ class ICommunityServiceTest {
         RatingMapper ratingMapper = new RatingMapperImpl(communityMapper);
         ratingMapper.setMappingService(mappingService);
         InstructorMapper instructorMapper = Mappers.getMapper(InstructorMapper.class);
+        postRepository = mock(PostRepository.class);
+        PostMapper postMapper = Mappers.getMapper(PostMapper.class);
         this.communityService = new CommunityService(communityRepository, instructorRepository, ratingRepository, userRepository,
-                communityMapper, ratingMapper, instructorMapper
-        );
+                communityMapper, ratingMapper, instructorMapper, postRepository, postMapper);
     }
 
     @Test
