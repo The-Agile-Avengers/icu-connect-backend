@@ -21,6 +21,8 @@ public class CommunityDto {
      */
     private Integer subscribersCount;
 
+    private Double ects;
+
     /**
      * Average rating object
      */

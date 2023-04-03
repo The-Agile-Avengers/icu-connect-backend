@@ -22,6 +22,8 @@ public class Community {
 
     private String name;
 
+    private Double ects;
+
     @ManyToOne
     private Instructor instructor;
 
