@@ -64,9 +64,9 @@ public class CommunityService implements ICommunityService {
         User user = User.builder().username("Test").password("password").build();
         userRepository.save(user);
 
-        createCommunityRating(community.getId(),
-            RatingDto.builder().teaching(3.0).content(2.5).workload(5.0).build(),
-            user.getUsername());
+        createCommunityRating(community.getModuleId(),
+                RatingDto.builder().teaching(3.0).content(2.5).workload(5.0).build(),
+                user.getUsername());
 
         return communityMapper.toDto(community);
     }
@@ -103,8 +103,8 @@ public class CommunityService implements ICommunityService {
     }
 
     @Override
-    public CommunityDto getCommunity(Long id) {
-        Optional<Community> communityOptional = this.communityRepository.findById(id);
+    public CommunityDto getCommunity(String moduleId) {
+        Optional<Community> communityOptional = this.communityRepository.findCommunityByModuleId(moduleId);
         if (communityOptional.isPresent()) {
             return communityMapper.toDto(communityOptional.get());
         }
@@ -112,32 +112,39 @@ public class CommunityService implements ICommunityService {
     }
 
     @Override
-    public Page<RatingDto> getCommunityRatings(Long id, int page, int size) {
+    public Page<RatingDto> getCommunityRatings(String moduleId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Rating> ratingPage = ratingRepository.findAllByCommunity_Id(id, pageable);
+        Optional<Community> community = communityRepository.findCommunityByModuleId(moduleId);
+        if (community.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community does not exist");
+        }
+        Page<Rating> ratingPage = ratingRepository.findAllByCommunity_ModuleId(moduleId, pageable);
         return ratingPage.map(ratingMapper::toDto);
     }
 
     @Override
-    public RatingDto createCommunityRating(Long id, RatingDto ratingDto, String username) {
+    public RatingDto createCommunityRating(String moduleId, RatingDto ratingDto, String username) {
         Optional<User> user = userRepository.findByUsername(username);
         if (user.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "user does not exist");
         }
-        Optional<Community> community = communityRepository.findById(id);
+        Optional<Community> community = communityRepository.findCommunityByModuleId(moduleId);
         if (community.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community does not exist");
         }
+        if (ratingRepository.findByCommunity_ModuleIdAndCreator_Id(community.get().getModuleId(), user.get().getId()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User has already rated this community");
+        }
         if (ratingDto.getTeaching() == null || ratingDto.getContent() == null
-            || ratingDto.getWorkload() == null) {
+                || ratingDto.getWorkload() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "not all categories were rated");
+                    "not all categories were rated");
         }
         if (ratingDto.getTeaching() < 0.0 || ratingDto.getTeaching() > 5.0
-            || ratingDto.getWorkload() < 0.0 || ratingDto.getWorkload() > 5.0
-            || ratingDto.getContent() < 0.0 || ratingDto.getContent() > 5.0) {
+                || ratingDto.getWorkload() < 0.0 || ratingDto.getWorkload() > 5.0
+                || ratingDto.getContent() < 0.0 || ratingDto.getContent() > 5.0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "ratings are not within range");
+                    "ratings are not within range");
         }
 
         Rating rating = ratingMapper.fromDto(ratingDto);
@@ -148,17 +155,17 @@ public class CommunityService implements ICommunityService {
     }
 
     @Override
-    public RatingAverage getCommunityRatingAverage(Long id) {
-        List<Rating> ratingList = ratingRepository.findAllByCommunity_Id(id);
+    public RatingAverage getCommunityRatingAverage(String moduleId) {
+        List<Rating> ratingList = ratingRepository.findAllByCommunity_ModuleId(moduleId);
         return new RatingAverage(ratingList);
     }
 
     @Override
-    public void deleteCommunity(long id) {
+    public void deleteCommunity(String moduleId) {
         // TODO: make sure requesting user has rights to do so
 
-        if (communityRepository.existsById(id)) {
-            communityRepository.deleteCommunityById(id);
+        if (communityRepository.existsByModuleId(moduleId)) {
+            communityRepository.deleteCommunityByModuleId(moduleId);
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "entity not found");
         }
