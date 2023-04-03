@@ -130,12 +130,65 @@ class ICommunityServiceTest {
     }
 
     @Test
+    void createCommunityExistingInstructor() {
+
+        setupSecurity(User.builder().username("test1").password("pw").build());
+
+        when(communityRepository.save(Mockito.any(Community.class)))
+                .thenAnswer(i -> {
+                    Community argument = (Community) i.getArguments()[0];
+                    argument.setId(1L);
+                    return argument;
+                });
+        Instructor instructor = Instructor.builder().id(11L).name("Test Instructor").build();
+        InstructorDto instructorDto = InstructorDto.builder().id(11L).name("Test Instructor").build();
+        when(instructorRepository.findInstructorByName(instructor.getName()))
+                .thenReturn(Optional.of(instructor));
+        CommunityDto communityDto = CommunityDto.builder().name("Test Community").instructor(instructorDto).moduleId("UZH1234").build();
+        CommunityDto output = communityService.createCommunity(communityDto);
+        verify(communityRepository, times(1)).save(argThat(
+                x -> true));
+        verify(communityRepository, times(1)).save(argThat(
+                x -> true));
+        Assertions.assertNotNull(output, "The object should have been created and returned");
+        Assertions.assertEquals(0, output.getSubscribersCount(), "For a new community there should not be any subscribers");
+        Assertions.assertNotNull(output.getRating(), "A rating object should have been created");
+        Assertions.assertNull(output.getRating().getTeaching(), "The ratings should be null, since no one has rated yet.");
+        Assertions.assertNull(output.getRating().getContent(), "The ratings should be null, since no one has rated yet.");
+        Assertions.assertNull(output.getRating().getWorkload(), "The ratings should be null, since no one has rated yet.");
+        Assertions.assertEquals(communityDto.getModuleId(), output.getModuleId(), "The module ID should be set.");
+        Assertions.assertEquals(communityDto.getName(), output.getName(), "The name should be set.");
+        Assertions.assertFalse(output.getJoined(), "User should not have joined yet.");
+
+    }
+
+    @Test
+    void createCommunityDuplicate() {
+
+        Community community = Community.builder().moduleId("UZH1234").build();
+        when(communityRepository.findCommunityByModuleId(community.getModuleId()))
+                .thenAnswer(i -> Optional.of(community));
+
+        InstructorDto instructorDto = InstructorDto.builder().id(11L).name("Test Instructor").build();
+
+        CommunityDto communityDto = CommunityDto.builder().name("Test Community").instructor(instructorDto).moduleId("UZH1234").build();
+        try {
+            CommunityDto output = communityService.createCommunity(communityDto);
+            Assertions.fail("Module id is duplicated, should throw an error");
+        } catch (Exception ignored) {
+
+        }
+
+
+    }
+
+    @Test
     void getCommunitiesOnlyOne() {
 
 
         Instructor instructor = Instructor.builder().name("Test Instructor").build();
         Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
-        User user = User.builder().username("test1").password("pw").subscriptionList(Set.of(community)).build();
+        User user = User.builder().username("test1").password("pw").subscriptionSet(Set.of(community)).build();
         setupSecurity(user);
         List<Community> communityList = List.of(community);
         when(communityRepository.findAll(Mockito.any(Pageable.class)))
@@ -188,11 +241,11 @@ class ICommunityServiceTest {
         when(communityRepository.findCommunityByModuleId(community.getModuleId()))
                 .thenAnswer(i -> Optional.of(community));
 
-        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(Set.of(community)).build();
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
         setupSecurity(user1);
         User user2 = User.builder().username("Test2").password("anything").id(3L).build();
 
-        when(userRepository.countAllBySubscriptionListContaining(community))
+        when(userRepository.countAllBysubscriptionSetContaining(community))
                 .thenAnswer(i -> 1);
 
         Rating rating = Rating.builder().creator(user1).community(community).content(4.0).workload(3.0).teaching(1.0).build();
@@ -233,7 +286,7 @@ class ICommunityServiceTest {
         when(communityRepository.findCommunityByModuleId(community.getModuleId()))
                 .thenAnswer(i -> Optional.of(community));
 
-        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(Set.of(community)).build();
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
         setupSecurity(user1);
 
         User user2 = User.builder().username("Test2").password("anything").id(3L).build();
@@ -260,15 +313,34 @@ class ICommunityServiceTest {
     }
 
     @Test
+    void getCommunityRatingsException() {
+        Instructor instructor = Instructor.builder().id(2L).name("Test Instructor").build();
+        Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
+        when(communityRepository.findCommunityByModuleId(community.getModuleId()))
+                .thenAnswer(i -> Optional.empty());
+
+        Pageable pageable = PageRequest.of(0, 1);
+
+        try {
+            communityService.getCommunityRatings(community.getModuleId(), pageable.getPageNumber(), pageable.getPageSize());
+            Assertions.fail("Community does not exist and an error should be thrown.");
+        } catch (Exception ignored) {
+
+        }
+
+    }
+
+    @Test
     void createCommunityRating() {
         Instructor instructor = Instructor.builder().id(10L).name("Test Instructor").build();
         Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
         when(communityRepository.findCommunityByModuleId(community.getModuleId()))
-            .thenAnswer(i -> Optional.of(community));
+                .thenAnswer(i -> Optional.of(community));
 
 
-        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(Set.of(community)).build();
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
 
+        setupSecurity(user1);
         when(userRepository.findByUsername(user1.getUsername())).thenAnswer(i -> Optional.of(user1));
 
         when(ratingRepository.save(Mockito.any(Rating.class)))
@@ -299,7 +371,7 @@ class ICommunityServiceTest {
         when(communityRepository.findCommunityByModuleId(community.getModuleId()))
                 .thenAnswer(i -> Optional.of(community));
 
-        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(Set.of(community)).build();
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
         Rating rating = Rating.builder().creator(user1).workload(3.0).content(1.0).teaching(5.0).text("Average course").community(community).build();
 
 
@@ -324,7 +396,7 @@ class ICommunityServiceTest {
         Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
 
 
-        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(Set.of(community)).build();
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
 
         when(userRepository.findByUsername(user1.getUsername())).thenAnswer(i -> Optional.empty());
 
@@ -343,7 +415,7 @@ class ICommunityServiceTest {
         when(communityRepository.findCommunityByModuleId(community.getModuleId()))
             .thenAnswer(i -> Optional.empty());
 
-        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(Set.of(community)).build();
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
 
         when(userRepository.findByUsername(user1.getUsername())).thenAnswer(i -> Optional.of(user1));
 
@@ -362,7 +434,7 @@ class ICommunityServiceTest {
         when(communityRepository.findCommunityByModuleId(community.getModuleId()))
             .thenAnswer(i -> Optional.of(community));
 
-        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionList(Set.of(community)).build();
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
 
         when(userRepository.findByUsername(user1.getUsername())).thenAnswer(i -> Optional.of(user1));
 
@@ -371,7 +443,50 @@ class ICommunityServiceTest {
         try {
             communityService.createCommunityRating(community.getModuleId(), rating, user1.getUsername());
             Assertions.fail("Rating workload is out of range and error should be thrown");
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
+    }
+
+    @Test
+    void createCommunityRatingIncomplete() {
+        Instructor instructor = Instructor.builder().id(10L).name("Test Instructor").build();
+        Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
+        when(communityRepository.findCommunityByModuleId(community.getModuleId()))
+                .thenAnswer(i -> Optional.of(community));
+
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
+
+        when(userRepository.findByUsername(user1.getUsername())).thenAnswer(i -> Optional.of(user1));
+
+        RatingDto rating = RatingDto.builder().workload(3.0).teaching(5.0).text("Average course").build();
+
+        try {
+            communityService.createCommunityRating(community.getModuleId(), rating, user1.getUsername());
+            Assertions.fail("Not all categories were rated, should throw an error.");
+        } catch (Exception ignore) {
+        }
+    }
+
+    @Test
+    void getCommunityRatingAverage() {
+
+        Instructor instructor = Instructor.builder().id(10L).name("Test Instructor").build();
+        Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
+        User user2 = User.builder().username("Test2").password("anything").id(3L).build();
+        Rating rating = Rating.builder().creator(user1).community(community).content(5.0).workload(3.0).teaching(2.0).build();
+        Rating rating2 = Rating.builder().creator(user2).community(community).content(5.0).workload(2.0).teaching(4.0).build();
+        when(ratingRepository.findAllByCommunity_ModuleId(community.getModuleId()))
+                .thenAnswer(i -> List.of(rating, rating2));
+
+        RatingAverage result = communityService.getCommunityRatingAverage(community.getModuleId());
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(5.0, result.getContent(), "Content rating should be equal to average.");
+        Assertions.assertEquals(2.5, result.getWorkload(), "Workload rating should be equal to average.");
+        Assertions.assertEquals(3.0, result.getTeaching(), "Teaching rating should be equal to average.");
+
+
     }
 
 }

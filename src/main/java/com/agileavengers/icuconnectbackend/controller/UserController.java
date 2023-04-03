@@ -20,10 +20,10 @@ public class UserController {
     }
 
     @PutMapping(value = "/communities/{moduleId}")
-    void updateCommunityRelation(@PathVariable(value = "moduleId") String moduleId) {
+    Set<CommunityDto> updateCommunityRelation(@PathVariable(value = "moduleId") String moduleId) {
         UserDetails principal =
                 (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        userService.updateCommunityRelation(principal.getUsername(), moduleId);
+        return userService.updateCommunityRelation(principal.getUsername(), moduleId);
 
     }
 

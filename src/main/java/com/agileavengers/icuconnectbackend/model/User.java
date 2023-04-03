@@ -28,6 +28,6 @@ public class User {
     private String password;
 
     @ManyToMany()
-    private Set<Community> subscriptionList = new HashSet<>();
+    private Set<Community> subscriptionSet = new HashSet<>();
 
 }

@@ -42,7 +42,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public void updateCommunityRelation(String username, String moduleId) {
+    public Set<CommunityDto> updateCommunityRelation(String username, String moduleId) {
         Optional<User> optUser = userRepository.findByUsername(username);
         if (optUser.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User does not exist");
@@ -54,16 +54,16 @@ public class UserService implements IUserService {
         }
         Community community = optCommunity.get();
 
-        if (user.getSubscriptionList().contains(community)) {
-            user.getSubscriptionList().remove(community);
+        if (user.getSubscriptionSet().contains(community)) {
+            user.getSubscriptionSet().remove(community);
         } else {
-            user.getSubscriptionList().add(community);
+            user.getSubscriptionSet().add(community);
         }
 
-        userRepository.save(user);
+        user = userRepository.save(user);
 
 
-
+        return user.getSubscriptionSet().stream().map(communityMapper::toDto).collect(Collectors.toSet());
 
     }
 
@@ -74,7 +74,7 @@ public class UserService implements IUserService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User does not exist");
         }
         User user = optUser.get();
-        return user.getSubscriptionList().stream().map(communityMapper::toDto).collect(Collectors.toSet());
+        return user.getSubscriptionSet().stream().map(communityMapper::toDto).collect(Collectors.toSet());
     }
 
     @Override
