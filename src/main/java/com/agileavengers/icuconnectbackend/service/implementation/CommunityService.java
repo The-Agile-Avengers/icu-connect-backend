@@ -92,6 +92,7 @@ public class CommunityService implements ICommunityService {
             }
         }
         community.setName(communityDto.getName());
+        community.setEcts(communityDto.getEcts());
         return communityMapper.toDto(communityRepository.save(community));
     }
 
