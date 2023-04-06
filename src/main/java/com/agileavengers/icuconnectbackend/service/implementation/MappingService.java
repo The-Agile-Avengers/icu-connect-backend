@@ -24,7 +24,7 @@ public class MappingService {
     }
 
     public Integer subscriberCount(Community community) {
-        return userRepository.countAllBySubscriptionListContaining(community);
+        return userRepository.countAllBysubscriptionSetContaining(community);
     }
 
     public RatingAverage calculateRating(Community community) {
@@ -39,9 +39,9 @@ public class MappingService {
         UserDetails principal =
                 (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userRepository.findByUsername(principal.getUsername()).get();
-        if (user.getSubscriptionList() == null) {
+        if (user.getSubscriptionSet() == null) {
             return false;
         }
-        return user.getSubscriptionList().contains(community);
+        return user.getSubscriptionSet().contains(community);
     }
 }

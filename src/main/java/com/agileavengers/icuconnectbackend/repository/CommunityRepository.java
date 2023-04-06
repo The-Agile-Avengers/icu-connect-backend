@@ -13,4 +13,5 @@ public interface CommunityRepository extends JpaRepository<Community, Long> {
     Boolean existsByModuleId(String moduleId);
 
     Optional<Community> findCommunityByModuleId(String moduleId);
+    Optional<Community> findCommunityById(Long communityId);
 }
