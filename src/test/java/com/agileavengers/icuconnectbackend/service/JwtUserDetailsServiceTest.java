@@ -28,7 +28,6 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest()
 @ExtendWith({ SpringExtension.class, MockitoExtension.class })
-//@ComponentScan(basePackageClasses = IcuConnectBackendApplication.class)
 public class JwtUserDetailsServiceTest {
     @Mock
     private UserRepository userRepository;

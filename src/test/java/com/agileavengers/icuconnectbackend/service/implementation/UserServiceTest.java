@@ -43,8 +43,6 @@ class UserServiceTest {
 
     @Mock
     CommunityRepository communityRepository;
-    //    @Mock
-//    InstructorRepository instructorRepository;
     @Mock
     RatingRepository ratingRepository;
     @Mock
@@ -65,7 +63,6 @@ class UserServiceTest {
     @BeforeEach
     void setup() {
         communityRepository = mock(CommunityRepository.class);
-//        instructorRepository = mock(InstructorRepository.class);
         communityRepository = mock(CommunityRepository.class);
         userRepository = mock(UserRepository.class);
         ratingRepository = mock(RatingRepository.class);
@@ -74,7 +71,6 @@ class UserServiceTest {
         communityMapper.setMappingService(mappingService);
         RatingMapper ratingMapper = new RatingMapperImpl(communityMapper);
         ratingMapper.setMappingService(mappingService);
-//        InstructorMapper instructorMapper = Mappers.getMapper(InstructorMapper.class);
         this.userService = new UserService(communityMapper, ratingMapper, communityRepository, userRepository, ratingRepository);
     }
 

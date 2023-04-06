@@ -45,7 +45,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
 @SpringBootTest()
-//@ComponentScan(basePackageClasses = IcuConnectBackendApplication.class)
 class ICommunityServiceTest {
 
     ICommunityService communityService;
