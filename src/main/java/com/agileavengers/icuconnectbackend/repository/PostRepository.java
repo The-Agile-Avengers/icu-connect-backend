@@ -13,7 +13,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
      * @param communityId Id of the relevant community
      * @return List of all referenced posts
      */
-    Page<Post> findAllByCommunity_Id(Long communityId, Pageable pageable);
+    Page<Post> findAllByCommunity_ModuleId(String moduleId, Pageable pageable);
 
     @Transactional()
     void deletePostById(Long id);
