@@ -53,8 +53,8 @@ public class CommunityController {
      */
     @GetMapping(value = "", params = {"page", "size"})
     public Page<CommunityDto> getCommunities(@RequestParam("page") int page,
-        @RequestParam("size") int size) {
-        return communityService.getCommunities(page, size);
+        @RequestParam("size") int size, @RequestParam("search") Optional<String> search) {
+        return communityService.getCommunities(page, size, search);
     }
 
     /**

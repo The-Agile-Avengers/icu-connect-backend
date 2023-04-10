@@ -12,7 +12,7 @@ public interface ICommunityService {
 
     CommunityDto createCommunity(CommunityDto communityDto);
 
-    Page<CommunityDto> getCommunities(int page, int size);
+    Page<CommunityDto> getCommunities(int page, int size, Optional<String> search);
 
     CommunityDto getCommunity(String moduleId);
 

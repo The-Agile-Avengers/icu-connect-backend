@@ -99,9 +99,16 @@ public class CommunityService implements ICommunityService {
     }
 
     @Override
-    public Page<CommunityDto> getCommunities(int page, int size) {
+    public Page<CommunityDto> getCommunities(int page, int size, Optional<String> search) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Community> communityPage = communityRepository.findAll(pageable);
+        Page<Community> communityPage;
+        if (search.isPresent()) {
+            String query = search.get();
+            communityPage = communityRepository
+                    .findAllByNameContainingOrModuleIdContainingOrInstructor_NameContaining(pageable, query, query, query);
+        } else {
+            communityPage = communityRepository.findAll(pageable);
+        }
         return communityPage.map(communityMapper::toDto);
     }
 

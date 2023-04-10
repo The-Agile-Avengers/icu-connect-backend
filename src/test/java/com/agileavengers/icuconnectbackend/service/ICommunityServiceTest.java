@@ -193,7 +193,7 @@ class ICommunityServiceTest {
                     return new PageImpl<>(communityList, argument, communityList.size());
                 });
 
-        Page<CommunityDto> result = communityService.getCommunities(0, 5);
+        Page<CommunityDto> result = communityService.getCommunities(0, 5, Optional.empty());
 
         Assertions.assertNotNull(result, "Page should not be null.");
         Assertions.assertEquals(1L, result.getTotalElements(), "Result should only contain one element.");
@@ -221,7 +221,7 @@ class ICommunityServiceTest {
                     return new PageImpl<>(communityList.subList(argument.getPageNumber(), argument.getPageSize()), argument, communityList.size());
                 });
 
-        Page<CommunityDto> result = communityService.getCommunities(0, 2);
+        Page<CommunityDto> result = communityService.getCommunities(0, 2, Optional.empty());
 
         Assertions.assertNotNull(result, "Page should not be null.");
         Assertions.assertEquals(3L, result.getTotalElements(), "Result should contain three elements.");
