@@ -1,9 +1,11 @@
 package com.agileavengers.icuconnectbackend.service;
 
 import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
+import com.agileavengers.icuconnectbackend.model.dto.PostDto;
 import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
 import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.userdetails.UserDetails;
 
 public interface ICommunityService {
     CommunityDto setupExampleCommunity();
@@ -21,4 +23,8 @@ public interface ICommunityService {
     RatingAverage getCommunityRatingAverage(String moduleId);
 
     void deleteCommunity(String moduleId);
+    
+    PostDto createPost(String moduleId, PostDto postDto, String username);
+
+    Page<PostDto> getCommunityPosts(String moduleId, int pageNumber, int size);
 }
