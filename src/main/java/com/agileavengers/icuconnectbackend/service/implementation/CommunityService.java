@@ -19,10 +19,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -113,8 +115,12 @@ public class CommunityService implements ICommunityService {
     }
 
     @Override
-    public Page<RatingDto> getCommunityRatings(String moduleId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<RatingDto> getCommunityRatings(String moduleId, int page, int size, Optional<Boolean> sortByMostLiked) {
+        Sort sort = Sort.by("thumbsUp").descending();
+        if (sortByMostLiked.isPresent() && !sortByMostLiked.get()) {
+            sort = Sort.by("creation").descending();
+        }
+        Pageable pageable = PageRequest.of(page, size, sort);
         Optional<Community> community = communityRepository.findCommunityByModuleId(moduleId);
         if (community.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community does not exist");
@@ -151,6 +157,7 @@ public class CommunityService implements ICommunityService {
         Rating rating = ratingMapper.fromDto(ratingDto);
         rating.setCommunity(community.get());
         rating.setCreator(user.get());
+        rating.setCreation(new Timestamp(System.currentTimeMillis()));
 
         return ratingMapper.toDto(ratingRepository.save(rating));
     }

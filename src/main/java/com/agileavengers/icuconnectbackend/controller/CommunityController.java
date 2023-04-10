@@ -10,6 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/communities")
 public class CommunityController {
@@ -89,8 +91,8 @@ public class CommunityController {
      */
     @GetMapping(value = "/{moduleId}/ratings", params = {"page", "size"})
     public Page<RatingDto> getCommunityRatings(@PathVariable("moduleId") String moduleId,
-                                               @RequestParam("page") int page, @RequestParam("size") int size) {
-        return communityService.getCommunityRatings(moduleId, page, size);
+                                               @RequestParam("page") int page, @RequestParam("size") int size, @RequestParam("sortByMostLiked") Optional<Boolean> sortByMostLiked) {
+        return communityService.getCommunityRatings(moduleId, page, size, sortByMostLiked);
     }
 
     @GetMapping(value = "/{moduleId}/ratings/average")

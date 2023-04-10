@@ -3,6 +3,7 @@ package com.agileavengers.icuconnectbackend.service.implementation;
 import com.agileavengers.icuconnectbackend.mapper.CommunityMapper;
 import com.agileavengers.icuconnectbackend.mapper.RatingMapper;
 import com.agileavengers.icuconnectbackend.mapper.RatingMapperImpl;
+import com.agileavengers.icuconnectbackend.mapper.UserMapper;
 import com.agileavengers.icuconnectbackend.model.Community;
 import com.agileavengers.icuconnectbackend.model.Instructor;
 import com.agileavengers.icuconnectbackend.model.Rating;
@@ -69,7 +70,9 @@ class UserServiceTest {
         MappingService mappingService = new MappingService(userRepository, ratingRepository);
         CommunityMapper communityMapper = Mappers.getMapper(CommunityMapper.class);
         communityMapper.setMappingService(mappingService);
-        RatingMapper ratingMapper = new RatingMapperImpl(communityMapper);
+        UserMapper userMapper = Mappers.getMapper(UserMapper.class);
+        userMapper.setMappingService(mappingService);
+        RatingMapper ratingMapper = new RatingMapperImpl(userMapper);
         ratingMapper.setMappingService(mappingService);
         this.userService = new UserService(communityMapper, ratingMapper, communityRepository, userRepository, ratingRepository);
     }
@@ -172,7 +175,7 @@ class UserServiceTest {
         subscription.add(community);
 
         User user = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(subscription).build();
-        setupSecurity(user);
+
         when(userRepository.findByUsername(user.getUsername())).thenAnswer(i -> Optional.of(user));
 
         Rating rating = Rating.builder().community(community).creator(user).content(4.0).workload(1.0).teaching(3.0).text("Rating text").build();
@@ -187,7 +190,7 @@ class UserServiceTest {
         Assertions.assertEquals(rating.getWorkload(), result.getWorkload(), "Value should not have changed");
         Assertions.assertEquals(0, result.getThumbsUp(), "Value should not have changed");
         Assertions.assertEquals(rating.getText(), result.getText(), "Value should not have changed");
-
+        Assertions.assertEquals(rating.getCreation(), result.getCreation(), "Timestamp should be the same");
     }
 
     @Test

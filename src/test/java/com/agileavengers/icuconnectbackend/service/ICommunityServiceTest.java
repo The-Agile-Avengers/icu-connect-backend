@@ -1,9 +1,6 @@
 package com.agileavengers.icuconnectbackend.service;
 
-import com.agileavengers.icuconnectbackend.mapper.CommunityMapper;
-import com.agileavengers.icuconnectbackend.mapper.InstructorMapper;
-import com.agileavengers.icuconnectbackend.mapper.RatingMapper;
-import com.agileavengers.icuconnectbackend.mapper.RatingMapperImpl;
+import com.agileavengers.icuconnectbackend.mapper.*;
 import com.agileavengers.icuconnectbackend.model.Community;
 import com.agileavengers.icuconnectbackend.model.Instructor;
 import com.agileavengers.icuconnectbackend.model.Rating;
@@ -27,10 +24,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -78,11 +72,13 @@ class ICommunityServiceTest {
         userRepository = mock(UserRepository.class);
         ratingRepository = mock(RatingRepository.class);
         MappingService mappingService = new MappingService(userRepository, ratingRepository);
-        CommunityMapper communityMapper = Mappers.getMapper(CommunityMapper.class);
-        communityMapper.setMappingService(mappingService);
-        RatingMapper ratingMapper = new RatingMapperImpl(communityMapper);
+        UserMapper userMapper = Mappers.getMapper(UserMapper.class);
+        userMapper.setMappingService(mappingService);
+        RatingMapper ratingMapper = new RatingMapperImpl(userMapper);
         ratingMapper.setMappingService(mappingService);
         InstructorMapper instructorMapper = Mappers.getMapper(InstructorMapper.class);
+        CommunityMapper communityMapper = Mappers.getMapper(CommunityMapper.class);
+        communityMapper.setMappingService(mappingService);
         this.communityService = new CommunityService(communityRepository, instructorRepository, ratingRepository, userRepository,
                 communityMapper, ratingMapper, instructorMapper
         );
@@ -287,7 +283,6 @@ class ICommunityServiceTest {
                 .thenAnswer(i -> Optional.of(community));
 
         User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
-        setupSecurity(user1);
 
         User user2 = User.builder().username("Test2").password("anything").id(3L).build();
 
@@ -295,7 +290,7 @@ class ICommunityServiceTest {
         Rating rating2 = Rating.builder().creator(user2).community(community).content(5.0).workload(2.0).teaching(4.0).build();
         List<Rating> ratingList = List.of(rating, rating2);
 
-        Pageable pageable = PageRequest.of(0, 1);
+        Pageable pageable = PageRequest.of(0, 1, Sort.by("thumbsUp").descending());
 
         when(ratingRepository.findAllByCommunity_ModuleId(community.getModuleId(), pageable))
                 .thenAnswer(i -> {
@@ -303,7 +298,7 @@ class ICommunityServiceTest {
                     return new PageImpl<>(ratingList.subList(argument.getPageNumber(), argument.getPageSize()), argument, ratingList.size());
                 });
 
-        Page<RatingDto> result = communityService.getCommunityRatings(community.getModuleId(), pageable.getPageNumber(), pageable.getPageSize());
+        Page<RatingDto> result = communityService.getCommunityRatings(community.getModuleId(), pageable.getPageNumber(), pageable.getPageSize(), Optional.of(Boolean.TRUE));
 
         Assertions.assertNotNull(result, "Page should not be null");
         Assertions.assertEquals(2L, result.getTotalElements(), "Result should contain two elements.");
@@ -322,7 +317,7 @@ class ICommunityServiceTest {
         Pageable pageable = PageRequest.of(0, 1);
 
         try {
-            communityService.getCommunityRatings(community.getModuleId(), pageable.getPageNumber(), pageable.getPageSize());
+            communityService.getCommunityRatings(community.getModuleId(), pageable.getPageNumber(), pageable.getPageSize(), Optional.empty());
             Assertions.fail("Community does not exist and an error should be thrown.");
         } catch (Exception ignored) {
 
@@ -340,7 +335,6 @@ class ICommunityServiceTest {
 
         User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
 
-        setupSecurity(user1);
         when(userRepository.findByUsername(user1.getUsername())).thenAnswer(i -> Optional.of(user1));
 
         when(ratingRepository.save(Mockito.any(Rating.class)))
@@ -359,8 +353,8 @@ class ICommunityServiceTest {
         Assertions.assertEquals(rating.getTeaching(), result.getTeaching(), "Fields should not have changed");
         Assertions.assertEquals(rating.getWorkload(), result.getWorkload(), "Fields should not have changed");
         Assertions.assertEquals(0, result.getThumbsUp(), "Thumbs up should be 0");
-        Assertions.assertNotNull(result.getId(), "Id should nto be null");
-
+        Assertions.assertNotNull(result.getId(), "Id should not be null");
+        Assertions.assertNotNull(result.getCreation(), "Creation should not be null");
 
     }
 
