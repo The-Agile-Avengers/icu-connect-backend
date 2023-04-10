@@ -1,6 +1,7 @@
 package com.agileavengers.icuconnectbackend.controller;
 
 import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
+import com.agileavengers.icuconnectbackend.model.dto.PostDto;
 import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
 import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
 import com.agileavengers.icuconnectbackend.service.ICommunityService;
@@ -117,5 +118,17 @@ public class CommunityController {
     public void deleteCommunity(@PathVariable("moduleId") String moduleId) {
         //TODO: only allowed with specific rights. might be removed for production
         communityService.deleteCommunity(moduleId);
+    }
+
+    @PostMapping(value = "/{moduleId}/posts")
+    public PostDto createPost(@PathVariable("moduleId") String moduleId, @RequestBody PostDto postDto) {
+        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return communityService.createPost(moduleId, postDto, principal.getUsername());
+    }
+
+    @GetMapping(value = "/{moduleId}/posts", params = { "page", "size" })
+    public Page<PostDto> getCommunityPosts(@PathVariable("moduleId") String moduleId, @RequestParam("page") int page,
+            @RequestParam("size") int size) {
+        return communityService.getCommunityPosts(moduleId, page, size);
     }
 }
