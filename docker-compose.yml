@@ -1,19 +1,22 @@
 version: '3'
 services:
-
-  mysqldb:
-    container_name: mysqldb
-    image: mysql:latest
+  postgres:
+    container_name: postgres
+    image: postgres:latest
     environment:
-      - MYSQL_ROOT_PASSWORD=<password here>
-      - MYSQL_DATABASE=icu-connect
-      # - MYSQL_USER=root
-      # - MYSQL_PASSWORD=<password here>
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=icu-connect
     restart: always
+    healthcheck:
+      test: [ 'CMD-SHELL', 'pg_isready -U root -d icu-connect' ]
+      interval: 5s
+      timeout: 5s
+      retries: 2
     ports:
-      - 3307:3306
+      - 5432:5432
     volumes:
-      - mysqldb:/var/lib/mysql
+      - postgres:/var/lib/postgresql
 
   api:
     container_name: api
@@ -21,16 +24,19 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
+
     environment:
-      SPRING_DATASOURCE_PASSWORD: <password here>
+      SPRING_DATASOURCE_PASSWORD: root
       SPRING_DATASOURCE_USER: root
       SPRING_DATASOURCE_NAME: icu-connect
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/icu-connect?createDatabaseIfNotExist=true&autoReconnect=true
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/icu-connect?createDatabaseIfNotExist=true autoReconnect=true
     depends_on:
-      - mysqldb
+      postgres:
+        condition: service_healthy
+
     ports:
       - 8080:8080
     restart: always
 
 volumes:
-  mysqldb:
+  postgres:
