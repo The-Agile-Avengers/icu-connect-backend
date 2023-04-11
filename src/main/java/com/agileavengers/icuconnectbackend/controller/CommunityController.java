@@ -20,11 +20,9 @@ import com.agileavengers.icuconnectbackend.model.dto.PostDto;
 import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
 import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
 import com.agileavengers.icuconnectbackend.service.ICommunityService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+
+import jakarta.validation.Valid;
+
 
 import java.util.Optional;
 
@@ -136,7 +134,7 @@ public class CommunityController {
     }
 
     @PostMapping(value = "/{moduleId}/posts")
-    public PostDto createPost(@PathVariable("moduleId") String moduleId, @RequestBody PostDto postDto) {
+    public PostDto createPost(@PathVariable("moduleId") String moduleId, @Valid @RequestBody PostDto postDto) {
         UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return communityService.createPost(moduleId, postDto, principal.getUsername());
     }
@@ -154,10 +152,9 @@ public class CommunityController {
     // }
 
     @PostMapping(value = "/{moduleId}/posts/{postId}/comments")
-    public ResponseEntity<?> createPostComment(@PathVariable String moduleId, @PathVariable Long postId,
-            @RequestBody CommentDto commentDto) {
+    public CommentDto createPostComment(@PathVariable String moduleId, @PathVariable Long postId,
+        @Valid @RequestBody CommentDto commentDto) {
         UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        communityService.createComment(moduleId, postId, commentDto, principal.getUsername());
-        return ResponseEntity.noContent().build();
+        return communityService.createComment(moduleId, postId, commentDto, principal.getUsername());
     }
 }

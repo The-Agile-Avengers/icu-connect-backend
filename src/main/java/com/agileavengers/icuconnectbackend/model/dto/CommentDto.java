@@ -1,5 +1,8 @@
 package com.agileavengers.icuconnectbackend.model.dto;
 
+import java.sql.Timestamp;
+
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 
 @Data
@@ -20,6 +23,7 @@ public class CommentDto {
     private UserDto creator;
 
     private Timestamp creation;
-    @NotNull
+
+    @NotBlank(message = "Text field should not be null")
     private String text;
 }
