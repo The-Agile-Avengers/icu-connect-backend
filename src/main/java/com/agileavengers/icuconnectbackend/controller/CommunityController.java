@@ -1,5 +1,20 @@
 package com.agileavengers.icuconnectbackend.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.agileavengers.icuconnectbackend.model.dto.CommentDto;
 import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
 import com.agileavengers.icuconnectbackend.model.dto.PostDto;
 import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
@@ -130,5 +145,19 @@ public class CommunityController {
     public Page<PostDto> getCommunityPosts(@PathVariable("moduleId") String moduleId, @RequestParam("page") int page,
             @RequestParam("size") int size) {
         return communityService.getCommunityPosts(moduleId, page, size);
+    }
+    // TODO: Impl. Delete Post in another user story
+    // @DeleteMapping(value = "/{moduleId}/posts/{postId}")
+    // public void deletePost(@PathVariable String moduleId, @PathVariable Long postId) {
+    //     UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    //     communityService.deletePost(moduleId, postId, principal.getUsername());
+    // }
+
+    @PostMapping(value = "/{moduleId}/posts/{postId}/comments")
+    public ResponseEntity<?> createPostComment(@PathVariable String moduleId, @PathVariable Long postId,
+            @RequestBody CommentDto commentDto) {
+        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        communityService.createComment(moduleId, postId, commentDto, principal.getUsername());
+        return ResponseEntity.noContent().build();
     }
 }

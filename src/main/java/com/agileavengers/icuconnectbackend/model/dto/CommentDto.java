@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 
+import jakarta.validation.constraints.NotNull;
+
 
 @Data
 @Builder
@@ -18,6 +20,6 @@ public class CommentDto {
     private UserDto creator;
 
     private Timestamp creation;
-
+    @NotNull
     private String text;
 }

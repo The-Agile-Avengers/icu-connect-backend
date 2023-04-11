@@ -1,10 +1,14 @@
 package com.agileavengers.icuconnectbackend.repository;
 
-import com.agileavengers.icuconnectbackend.model.Post;
-import jakarta.transaction.Transactional;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.agileavengers.icuconnectbackend.model.Post;
+
+import jakarta.transaction.Transactional;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
     /**
@@ -15,6 +19,13 @@ public interface PostRepository extends JpaRepository<Post, Long> {
      */
     Page<Post> findAllByCommunity_ModuleId(String moduleId, Pageable pageable);
 
+    Optional<Post> findByIdAndCommunity_ModuleId(Long id, String moduleId);
+
+    Boolean existsByCommunity_ModuleIdAndId(String moduleId, Long id);
+
     @Transactional()
     void deletePostById(Long id);
+
+    @Transactional()
+    void deletePostByIdAndCreator_Id(Long id, Long creatorId);
 }

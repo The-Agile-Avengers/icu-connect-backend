@@ -1,15 +1,39 @@
 package com.agileavengers.icuconnectbackend.service.implementation;
 
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.agileavengers.icuconnectbackend.mapper.CommentMapper;
 import com.agileavengers.icuconnectbackend.mapper.CommunityMapper;
 import com.agileavengers.icuconnectbackend.mapper.InstructorMapper;
 import com.agileavengers.icuconnectbackend.mapper.PostMapper;
 import com.agileavengers.icuconnectbackend.mapper.RatingMapper;
-import com.agileavengers.icuconnectbackend.model.*;
+import com.agileavengers.icuconnectbackend.model.Comment;
+import com.agileavengers.icuconnectbackend.model.Community;
+import com.agileavengers.icuconnectbackend.model.Instructor;
+import com.agileavengers.icuconnectbackend.model.Post;
+import com.agileavengers.icuconnectbackend.model.Rating;
+import com.agileavengers.icuconnectbackend.model.User;
+import com.agileavengers.icuconnectbackend.model.dto.CommentDto;
 import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
 import com.agileavengers.icuconnectbackend.model.dto.PostDto;
 import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
 import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
-import com.agileavengers.icuconnectbackend.repository.*;
+import com.agileavengers.icuconnectbackend.repository.CommentRepository;
+import com.agileavengers.icuconnectbackend.repository.CommunityRepository;
+import com.agileavengers.icuconnectbackend.repository.InstructorRepository;
+import com.agileavengers.icuconnectbackend.repository.PostRepository;
+import com.agileavengers.icuconnectbackend.repository.RatingRepository;
+import com.agileavengers.icuconnectbackend.repository.UserRepository;
 import com.agileavengers.icuconnectbackend.service.ICommunityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -31,17 +55,20 @@ public class CommunityService implements ICommunityService {
     private final RatingMapper ratingMapper;
     private final InstructorMapper instructorMapper;
     private final PostMapper postMapper;
+    private final CommentMapper commentMapper;
     PostRepository postRepository;
     CommunityRepository communityRepository;
     InstructorRepository instructorRepository;
     RatingRepository ratingRepository;
     UserRepository userRepository;
+    CommentRepository commentRepository;
 
     @Autowired
     public CommunityService(CommunityRepository communityRepository,
             InstructorRepository instructorRepository, RatingRepository ratingRepository,
             UserRepository userRepository, CommunityMapper communityMapper, RatingMapper ratingMapper,
-            InstructorMapper instructorMapper, PostRepository postRepository, PostMapper postMapper) {
+            InstructorMapper instructorMapper, PostRepository postRepository, PostMapper postMapper,
+            CommentMapper commentMapper, CommentRepository commentRepository) {
         this.communityRepository = communityRepository;
         this.instructorRepository = instructorRepository;
         this.ratingRepository = ratingRepository;
@@ -51,6 +78,8 @@ public class CommunityService implements ICommunityService {
         this.instructorMapper = instructorMapper;
         this.postRepository = postRepository;
         this.postMapper = postMapper;
+        this.commentMapper = commentMapper;
+        this.commentRepository = commentRepository;
     }
 
     @Override
@@ -215,5 +244,43 @@ public class CommunityService implements ICommunityService {
         }
         Page<Post> postPage = postRepository.findAllByCommunity_ModuleId(moduleId, page);
         return postPage.map(postMapper::toDto);
+    }
+
+    // TODO: Delete childs (comments) before deleting post
+    // @Override
+    // public void deletePost(String moduleId, Long postId, String username) {
+    //     Optional<User> user = userRepository.findByUsername(username);
+    //     if (user.isEmpty()) {
+    //         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "");
+    //     }
+
+    //     if (postRepository.existsByCommunity_ModuleIdAndId(moduleId, postId)) {
+    //         postRepository.deletePostByIdAndCreator_Id(postId, user.get().getId());
+    //     } else {
+    //         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "entity not found");
+    //     }
+    // }
+
+    @Override
+    public CommentDto createComment(String moduleId, Long postId, CommentDto commentDto, String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "user does not exist");
+        }
+        Optional<Community> community = communityRepository.findCommunityByModuleId(moduleId);
+        if (community.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community does not exist");
+        }
+        Optional<Post> post = postRepository.findByIdAndCommunity_ModuleId(postId, moduleId);
+        if (post.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post does not exist");
+        }
+
+        Comment comment = commentMapper.fromDto(commentDto);
+        comment.setCreator(user.get());
+        comment.setPost(post.get());
+        comment.setCreation(new Timestamp(System.currentTimeMillis()));
+
+        return commentMapper.toDto(commentRepository.save(comment));
     }
 }
