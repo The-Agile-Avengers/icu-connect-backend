@@ -1,18 +1,11 @@
 package com.agileavengers.icuconnectbackend.service;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
+import com.agileavengers.icuconnectbackend.mapper.*;
+import com.agileavengers.icuconnectbackend.model.*;
+import com.agileavengers.icuconnectbackend.model.dto.*;
+import com.agileavengers.icuconnectbackend.repository.*;
+import com.agileavengers.icuconnectbackend.service.implementation.CommunityService;
+import com.agileavengers.icuconnectbackend.service.implementation.MappingService;
 import org.junit.gen5.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,39 +15,22 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.agileavengers.icuconnectbackend.mapper.CommunityMapper;
-import com.agileavengers.icuconnectbackend.mapper.InstructorMapper;
-import com.agileavengers.icuconnectbackend.mapper.PostMapper;
-import com.agileavengers.icuconnectbackend.mapper.RatingMapper;
-import com.agileavengers.icuconnectbackend.mapper.RatingMapperImpl;
-import com.agileavengers.icuconnectbackend.model.Community;
-import com.agileavengers.icuconnectbackend.model.Instructor;
-import com.agileavengers.icuconnectbackend.model.Post;
-import com.agileavengers.icuconnectbackend.model.Rating;
-import com.agileavengers.icuconnectbackend.model.User;
-import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
-import com.agileavengers.icuconnectbackend.model.dto.InstructorDto;
-import com.agileavengers.icuconnectbackend.model.dto.PostDto;
-import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
-import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
-import com.agileavengers.icuconnectbackend.model.dto.UserDto;
-import com.agileavengers.icuconnectbackend.repository.CommunityRepository;
-import com.agileavengers.icuconnectbackend.repository.InstructorRepository;
-import com.agileavengers.icuconnectbackend.repository.PostRepository;
-import com.agileavengers.icuconnectbackend.repository.RatingRepository;
-import com.agileavengers.icuconnectbackend.repository.UserRepository;
-import com.agileavengers.icuconnectbackend.service.implementation.CommunityService;
-import com.agileavengers.icuconnectbackend.service.implementation.MappingService;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.*;
 
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
 @SpringBootTest()
@@ -93,15 +69,18 @@ class ICommunityServiceTest {
         userRepository = mock(UserRepository.class);
         ratingRepository = mock(RatingRepository.class);
         MappingService mappingService = new MappingService(userRepository, ratingRepository);
-        CommunityMapper communityMapper = Mappers.getMapper(CommunityMapper.class);
-        communityMapper.setMappingService(mappingService);
-        RatingMapper ratingMapper = new RatingMapperImpl(communityMapper);
+        UserMapper userMapper = Mappers.getMapper(UserMapper.class);
+        userMapper.setMappingService(mappingService);
+        RatingMapper ratingMapper = new RatingMapperImpl(userMapper);
         ratingMapper.setMappingService(mappingService);
         InstructorMapper instructorMapper = Mappers.getMapper(InstructorMapper.class);
         postRepository = mock(PostRepository.class);
         PostMapper postMapper = Mappers.getMapper(PostMapper.class);
+        CommunityMapper communityMapper = Mappers.getMapper(CommunityMapper.class);
+        communityMapper.setMappingService(mappingService);
         this.communityService = new CommunityService(communityRepository, instructorRepository, ratingRepository, userRepository,
-                communityMapper, ratingMapper, instructorMapper, postRepository, postMapper);
+                communityMapper, ratingMapper, instructorMapper, postRepository, postMapper
+        );
     }
 
     @Test
@@ -213,7 +192,7 @@ class ICommunityServiceTest {
                     return new PageImpl<>(communityList, argument, communityList.size());
                 });
 
-        Page<CommunityDto> result = communityService.getCommunities(0, 5);
+        Page<CommunityDto> result = communityService.getCommunities(0, 5, Optional.empty());
 
         Assertions.assertNotNull(result, "Page should not be null.");
         Assertions.assertEquals(1L, result.getTotalElements(), "Result should only contain one element.");
@@ -241,7 +220,7 @@ class ICommunityServiceTest {
                     return new PageImpl<>(communityList.subList(argument.getPageNumber(), argument.getPageSize()), argument, communityList.size());
                 });
 
-        Page<CommunityDto> result = communityService.getCommunities(0, 2);
+        Page<CommunityDto> result = communityService.getCommunities(0, 2, Optional.empty());
 
         Assertions.assertNotNull(result, "Page should not be null.");
         Assertions.assertEquals(3L, result.getTotalElements(), "Result should contain three elements.");
@@ -303,7 +282,6 @@ class ICommunityServiceTest {
                 .thenAnswer(i -> Optional.of(community));
 
         User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
-        setupSecurity(user1);
 
         User user2 = User.builder().username("Test2").password("anything").id(3L).build();
 
@@ -311,7 +289,7 @@ class ICommunityServiceTest {
         Rating rating2 = Rating.builder().creator(user2).community(community).content(5.0).workload(2.0).teaching(4.0).build();
         List<Rating> ratingList = List.of(rating, rating2);
 
-        Pageable pageable = PageRequest.of(0, 1);
+        Pageable pageable = PageRequest.of(0, 1, Sort.by("thumbsUp").descending());
 
         when(ratingRepository.findAllByCommunity_ModuleId(community.getModuleId(), pageable))
                 .thenAnswer(i -> {
@@ -319,7 +297,7 @@ class ICommunityServiceTest {
                     return new PageImpl<>(ratingList.subList(argument.getPageNumber(), argument.getPageSize()), argument, ratingList.size());
                 });
 
-        Page<RatingDto> result = communityService.getCommunityRatings(community.getModuleId(), pageable.getPageNumber(), pageable.getPageSize());
+        Page<RatingDto> result = communityService.getCommunityRatings(community.getModuleId(), pageable.getPageNumber(), pageable.getPageSize(), Optional.of(Boolean.TRUE));
 
         Assertions.assertNotNull(result, "Page should not be null");
         Assertions.assertEquals(2L, result.getTotalElements(), "Result should contain two elements.");
@@ -338,7 +316,7 @@ class ICommunityServiceTest {
         Pageable pageable = PageRequest.of(0, 1);
 
         try {
-            communityService.getCommunityRatings(community.getModuleId(), pageable.getPageNumber(), pageable.getPageSize());
+            communityService.getCommunityRatings(community.getModuleId(), pageable.getPageNumber(), pageable.getPageSize(), Optional.empty());
             Assertions.fail("Community does not exist and an error should be thrown.");
         } catch (Exception ignored) {
 
@@ -356,7 +334,6 @@ class ICommunityServiceTest {
 
         User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
 
-        setupSecurity(user1);
         when(userRepository.findByUsername(user1.getUsername())).thenAnswer(i -> Optional.of(user1));
 
         when(ratingRepository.save(Mockito.any(Rating.class)))
@@ -375,8 +352,8 @@ class ICommunityServiceTest {
         Assertions.assertEquals(rating.getTeaching(), result.getTeaching(), "Fields should not have changed");
         Assertions.assertEquals(rating.getWorkload(), result.getWorkload(), "Fields should not have changed");
         Assertions.assertEquals(0, result.getThumbsUp(), "Thumbs up should be 0");
-        Assertions.assertNotNull(result.getId(), "Id should nto be null");
-
+        Assertions.assertNotNull(result.getId(), "Id should not be null");
+        Assertions.assertNotNull(result.getCreation(), "Creation should not be null");
 
     }
 
@@ -548,7 +525,7 @@ class ICommunityServiceTest {
         User user2 = User.builder().username("Test2").password("anything").id(3L).build();
         Post post = Post.builder().creator(user1).community(community).title("Test Title 1").text("Test text 1").creation(new Timestamp(System.currentTimeMillis())).build();
         Post post2 = Post.builder().creator(user2).community(community).title("Test Title 2").text("Test text 2").creation(new Timestamp(System.currentTimeMillis())).build();
-        
+
         List<Post> postList = List.of(post,post2);
 
         when(communityRepository.findCommunityByModuleId(community.getModuleId()))
@@ -570,7 +547,7 @@ class ICommunityServiceTest {
 
     @Test
     void getCommunityPostsEmpty() {
-        
+
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
             communityService.getCommunityPosts("noExist", 0, 2);
         }, "ResponeStatusException");

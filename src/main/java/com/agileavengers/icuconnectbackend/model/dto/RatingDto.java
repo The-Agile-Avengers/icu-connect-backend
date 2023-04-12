@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -13,12 +15,12 @@ public class RatingDto {
 
     private Long id;
 
-    private CommunityDto community;
-
     private Double teaching;
     private Double content;
     private Double workload;
 
+    private UserDto creator;
+    private Timestamp creation;
 
     private String text;
 

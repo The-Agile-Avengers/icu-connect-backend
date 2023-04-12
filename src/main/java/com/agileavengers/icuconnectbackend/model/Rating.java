@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
 import java.util.Set;
 
 @Entity
@@ -21,6 +22,7 @@ public class Rating {
 
     @ManyToOne
     private User creator;
+    private Timestamp creation;
 
     @ManyToOne
     private Community community;

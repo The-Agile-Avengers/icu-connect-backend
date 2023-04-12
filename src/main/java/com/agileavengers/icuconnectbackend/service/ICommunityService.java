@@ -7,16 +7,18 @@ import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Optional;
+
 public interface ICommunityService {
     CommunityDto setupExampleCommunity();
 
     CommunityDto createCommunity(CommunityDto communityDto);
 
-    Page<CommunityDto> getCommunities(int page, int size);
+    Page<CommunityDto> getCommunities(int page, int size, Optional<String> search);
 
     CommunityDto getCommunity(String moduleId);
 
-    Page<RatingDto> getCommunityRatings(String moduleId, int page, int size);
+    Page<RatingDto> getCommunityRatings(String moduleId, int page, int size, Optional<Boolean> sortByMostLiked);
 
     RatingDto createCommunityRating(String moduleId, RatingDto ratingDto, String username);
 
