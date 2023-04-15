@@ -14,5 +14,8 @@
 6. Run `docker-compose up -d` which will start your database container.
 7. Use your editor to start the backend. This should set up the tables in the database and then it is ready to be used.
 
-### Run backend in an editor
+### Run backend in a docker container
 6. Run `docker-compose up -d` which will start your database and your backend container.
+
+### OpenAPI
+To access the openAPI resource visit: `localhost:8080/swagger-ui/index.html`
