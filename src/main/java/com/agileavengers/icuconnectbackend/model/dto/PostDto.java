@@ -1,15 +1,13 @@
 package com.agileavengers.icuconnectbackend.model.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.sql.Timestamp;
 import java.util.List;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
@@ -19,12 +17,10 @@ public class PostDto {
     private Long id;
     private UserDto creator;
     private Timestamp creation;
-    
-    @NotNull
-    @NotBlank
+
+    @NotBlank(message = "Title cannot be blank")
     private String title;
-    @NotNull
-    @NotBlank
+    @NotBlank(message = "Text cannot be blank")
     private String text;
     /**
      * Possible link to MongoDB

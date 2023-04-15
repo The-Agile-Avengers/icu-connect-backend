@@ -1,11 +1,18 @@
 package com.agileavengers.icuconnectbackend.service;
 
-import com.agileavengers.icuconnectbackend.mapper.*;
-import com.agileavengers.icuconnectbackend.model.*;
-import com.agileavengers.icuconnectbackend.model.dto.*;
-import com.agileavengers.icuconnectbackend.repository.*;
-import com.agileavengers.icuconnectbackend.service.implementation.CommunityService;
-import com.agileavengers.icuconnectbackend.service.implementation.MappingService;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 import org.junit.gen5.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,23 +21,48 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.*;
+import com.agileavengers.icuconnectbackend.mapper.CommentMapper;
+import com.agileavengers.icuconnectbackend.mapper.CommunityMapper;
+import com.agileavengers.icuconnectbackend.mapper.InstructorMapper;
+import com.agileavengers.icuconnectbackend.mapper.PostMapper;
+import com.agileavengers.icuconnectbackend.mapper.RatingMapper;
+import com.agileavengers.icuconnectbackend.mapper.RatingMapperImpl;
+import com.agileavengers.icuconnectbackend.mapper.UserMapper;
+import com.agileavengers.icuconnectbackend.model.Comment;
+import com.agileavengers.icuconnectbackend.model.Community;
+import com.agileavengers.icuconnectbackend.model.Instructor;
+import com.agileavengers.icuconnectbackend.model.Post;
+import com.agileavengers.icuconnectbackend.model.Rating;
+import com.agileavengers.icuconnectbackend.model.User;
+import com.agileavengers.icuconnectbackend.model.dto.CommentDto;
+import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
+import com.agileavengers.icuconnectbackend.model.dto.InstructorDto;
+import com.agileavengers.icuconnectbackend.model.dto.PostDto;
+import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
+import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
+import com.agileavengers.icuconnectbackend.model.dto.UserDto;
+import com.agileavengers.icuconnectbackend.repository.CommentRepository;
+import com.agileavengers.icuconnectbackend.repository.CommunityRepository;
+import com.agileavengers.icuconnectbackend.repository.InstructorRepository;
+import com.agileavengers.icuconnectbackend.repository.PostRepository;
+import com.agileavengers.icuconnectbackend.repository.RatingRepository;
+import com.agileavengers.icuconnectbackend.repository.UserRepository;
+import com.agileavengers.icuconnectbackend.service.implementation.CommunityService;
+import com.agileavengers.icuconnectbackend.service.implementation.MappingService;
 
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
 @SpringBootTest()
@@ -48,6 +80,8 @@ class ICommunityServiceTest {
     UserRepository userRepository;
     @Mock
     PostRepository postRepository;
+    @Mock
+    CommentRepository commentRepository;
 
     void setupSecurity(User user) {
         when(userRepository.findByUsername(user.getUsername())).thenAnswer(i -> Optional.of(user));
@@ -68,6 +102,7 @@ class ICommunityServiceTest {
         communityRepository = mock(CommunityRepository.class);
         userRepository = mock(UserRepository.class);
         ratingRepository = mock(RatingRepository.class);
+        commentRepository = mock(CommentRepository.class);
         MappingService mappingService = new MappingService(userRepository, ratingRepository);
         UserMapper userMapper = Mappers.getMapper(UserMapper.class);
         userMapper.setMappingService(mappingService);
@@ -75,12 +110,15 @@ class ICommunityServiceTest {
         ratingMapper.setMappingService(mappingService);
         InstructorMapper instructorMapper = Mappers.getMapper(InstructorMapper.class);
         postRepository = mock(PostRepository.class);
-        PostMapper postMapper = Mappers.getMapper(PostMapper.class);
         CommunityMapper communityMapper = Mappers.getMapper(CommunityMapper.class);
         communityMapper.setMappingService(mappingService);
+        CommentMapper commentMapper = Mappers.getMapper(CommentMapper.class);
+        commentMapper.setMappingService(mappingService);
+        PostMapper postMapper = Mappers.getMapper(PostMapper.class);
+        postMapper.setMappingService(mappingService, commentRepository, commentMapper);
+
         this.communityService = new CommunityService(communityRepository, instructorRepository, ratingRepository, userRepository,
-                communityMapper, ratingMapper, instructorMapper, postRepository, postMapper
-        );
+                communityMapper, ratingMapper, instructorMapper, postRepository, postMapper, commentMapper, commentRepository);
     }
 
     @Test
@@ -492,7 +530,9 @@ class ICommunityServiceTest {
 
         User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
 
-        PostDto post = PostDto.builder().id(2L).title("Question 1 Title").text("Question 1 Text")
+        Post post = Post.builder().id(2L).title("Question 1 Title").text("Question 1 Text").community(community).creation(new Timestamp(System.currentTimeMillis())).creator(user1).build();
+
+        PostDto postDto = PostDto.builder().id(2L).title("Question 1 Title").text("Question 1 Text")
         .build();
 
         when(userRepository.findByUsername(user1.getUsername())).thenAnswer(i -> Optional.of(user1));
@@ -504,9 +544,10 @@ class ICommunityServiceTest {
                 return argument;
             });
 
+        PostDto result = communityService.createPost(community.getModuleId(), postDto, user1.getUsername());
+
         UserDto userDto = UserDto.builder().id(user1.getId()).username(user1.getUsername()).build();
 
-        PostDto result = communityService.createPost(community.getModuleId(), post, user1.getUsername());
 
         Assertions.assertNotNull(result, "Returned object should not be null");
         Assertions.assertEquals(userDto, result.getCreator(), "Fields should not have changed");
@@ -553,5 +594,96 @@ class ICommunityServiceTest {
         }, "ResponeStatusException");
 
         Assertions.assertEquals("community does not exist", exception.getReason());
+    }
+
+    @Test
+    void createCommentExistingPost() {
+        Instructor instructor = Instructor.builder().id(10L).name("Test Instructor").build();
+        Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
+        when(communityRepository.findCommunityByModuleId(community.getModuleId()))
+                .thenAnswer(i -> Optional.of(community));
+
+
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
+
+        when(userRepository.findByUsername(user1.getUsername())).thenAnswer(i -> Optional.of(user1));
+
+        UserDto userDto = UserDto.builder().id(user1.getId()).username(user1.getUsername()).build();
+
+        Post post = Post.builder().id(2L).title("Question 1 Title").text("Question 1 Text").community(community).creation(new Timestamp(System.currentTimeMillis())).creator(user1).build();
+
+        PostDto postDto = PostDto.builder().id(2L).title("Question 1 Title").text("Question 1 Text")
+        .build();
+
+        CommentDto commentDto = CommentDto.builder().id(1L).creation(new Timestamp(System.currentTimeMillis())).creator(userDto).text("Test comment text").build();
+
+
+        when(postRepository.findByIdAndCommunity_ModuleId(postDto.getId(), community.getModuleId()))
+            .thenAnswer(i -> Optional.of(post));
+
+        when(commentRepository.save(Mockito.any(Comment.class)))
+            .thenAnswer(i -> {
+                Comment argument = (Comment) i.getArguments()[0];
+                argument.setId(1L);
+                return argument;
+            });
+
+        CommentDto result = communityService.createComment(community.getModuleId(), post.getId(), commentDto, user1.getUsername());
+
+        Assertions.assertNotNull(result, "Returned object should not be null");
+        Assertions.assertEquals(userDto, result.getCreator(), "Fields should not have changed");
+        Assertions.assertEquals(commentDto.getText(), result.getText(), "Fields should not have changed");
+        Assertions.assertNotNull(result.getId(), "Id should not be null");
+
+    }
+
+    @Test
+    void getCommunityPostsWithComments() {
+
+        Instructor instructor = Instructor.builder().id(10L).name("Test Instructor").build();
+        Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
+        Post post = Post.builder().id(1L).creator(user1).community(community).title("Test Title 1").text("Test text 1").creation(new Timestamp(System.currentTimeMillis())).build();
+        Post post2 = Post.builder().id(2L).creator(user1).community(community).title("Test Title 2").text("Test text 2").creation(new Timestamp(System.currentTimeMillis())).build();
+        
+        UserDto userDto = UserDto.builder().id(user1.getId()).username(user1.getUsername()).build();
+
+        CommentDto commentDto = CommentDto.builder().id(1L).creation(new Timestamp(System.currentTimeMillis())).creator(userDto).text("Test comment text").build();
+
+        Comment comment = Comment.builder().id(1L).creation(new Timestamp(System.currentTimeMillis())).creator(user1).text("Test comment text").post(post).build();
+
+        List<Post> postList = List.of(post,post2);
+       
+        when(userRepository.findByUsername(user1.getUsername())).thenAnswer(i -> Optional.of(user1));
+
+        when(communityRepository.findCommunityByModuleId(community.getModuleId()))
+                .thenAnswer(i -> Optional.of(community));
+
+        when(postRepository.findAllByCommunity_ModuleId(Mockito.anyString(), Mockito.any(Pageable.class)))
+            .thenAnswer(i -> {
+                Pageable argument = (Pageable) i.getArguments()[1];
+                return new PageImpl<>(postList.subList(argument.getPageNumber(), argument.getPageSize()), argument, postList.size());
+        });
+
+        when(postRepository.findByIdAndCommunity_ModuleId(post.getId(), community.getModuleId())).thenAnswer(i -> Optional.of(post));
+
+        when(commentRepository.save(Mockito.any(Comment.class)))
+            .thenAnswer(i -> comment);
+
+        when(commentRepository.findAllByPost_Id(post.getId()))
+            .thenAnswer(i -> List.of(comment));
+        
+            
+
+        communityService.createComment(community.getModuleId(), post.getId(), commentDto, user1.getUsername());
+
+        Page<PostDto> result = communityService.getCommunityPosts(community.getModuleId(), 0,2);
+
+
+        Assertions.assertNotNull(result, "Page should not be null.");
+        Assertions.assertEquals(2L, result.getTotalElements(), "Result should contain two elements.");
+        Assertions.assertEquals(1, result.getTotalPages(), "Result should contain one page.");
+        Assertions.assertEquals(2, result.getContent().size(), "Result should contain two elements.");
+        Assertions.assertEquals(commentDto, result.getContent().get(0).getCommentList().get(0), "First post of result should contain 1 comment");
     }
 }
