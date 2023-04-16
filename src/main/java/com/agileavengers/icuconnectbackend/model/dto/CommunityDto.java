@@ -10,8 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommunityDto {
-    private Long id;
-
     private String moduleId;
 
     private String name;
@@ -23,9 +21,13 @@ public class CommunityDto {
      */
     private Integer subscribersCount;
 
+    private Double ects;
+
     /**
      * Average rating object
      */
     private RatingAverage rating;
+
+    private Boolean joined;
 
 }

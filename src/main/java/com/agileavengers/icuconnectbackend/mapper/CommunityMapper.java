@@ -22,6 +22,7 @@ public abstract class CommunityMapper {
 
     @Mapping(target = "subscribersCount", expression = "java(mappingService.subscriberCount(community))")
     @Mapping(target = "rating", expression = "java(mappingService.calculateRating(community))")
+    @Mapping(target = "joined", expression = "java(mappingService.isJoined(community))")
     public abstract CommunityDto toDto(Community community);
 
     public abstract Community fromDto(CommunityDto communityDto);

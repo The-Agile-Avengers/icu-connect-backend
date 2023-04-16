@@ -1,13 +1,15 @@
 package com.agileavengers.icuconnectbackend.service.implementation;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.agileavengers.icuconnectbackend.model.Community;
 import com.agileavengers.icuconnectbackend.model.Rating;
+import com.agileavengers.icuconnectbackend.model.User;
 import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
 import com.agileavengers.icuconnectbackend.repository.RatingRepository;
 import com.agileavengers.icuconnectbackend.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
 
 @Service
 public class MappingService {
@@ -21,17 +23,25 @@ public class MappingService {
         this.ratingRepository = ratingRepository;
     }
 
-    // TODO: Implement subscriber count
     public Integer subscriberCount(Community community) {
-        return userRepository.countAllBySubscriptionListContaining(community);
+        return userRepository.countAllBysubscriptionSetContaining(community);
     }
 
-    // TODO: Implement rating calculation
     public RatingAverage calculateRating(Community community) {
-        return new RatingAverage(ratingRepository.findAllByCommunity_Id(community.getId()));
+        return new RatingAverage(ratingRepository.findAllByCommunity_ModuleId(community.getModuleId()));
     }
 
     public Integer getRatingThumbsUp(Rating rating) {
         return rating.getThumbsUp() != null ? rating.getThumbsUp().size() : 0;
+    }
+
+    public Boolean isJoined(Community community) {
+        UserDetails principal =
+                (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findByUsername(principal.getUsername()).get();
+        if (user.getSubscriptionSet() == null) {
+            return false;
+        }
+        return user.getSubscriptionSet().contains(community);
     }
 }

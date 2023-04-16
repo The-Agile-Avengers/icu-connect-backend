@@ -1,14 +1,30 @@
 package com.agileavengers.icuconnectbackend.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.agileavengers.icuconnectbackend.model.dto.CommentDto;
 import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
+import com.agileavengers.icuconnectbackend.model.dto.PostDto;
 import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
 import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
 import com.agileavengers.icuconnectbackend.service.ICommunityService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+
+import jakarta.validation.Valid;
+
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/communities")
@@ -51,19 +67,19 @@ public class CommunityController {
      */
     @GetMapping(value = "", params = {"page", "size"})
     public Page<CommunityDto> getCommunities(@RequestParam("page") int page,
-        @RequestParam("size") int size) {
-        return communityService.getCommunities(page, size);
+        @RequestParam("size") int size, @RequestParam("search") Optional<String> search) {
+        return communityService.getCommunities(page, size, search);
     }
 
     /**
      * Get a specific community by id
      *
-     * @param id id of the community
+     * @param moduleId of the community
      * @return Community if it exists
      */
-    @GetMapping(value = "/{id}")
-    public CommunityDto getCommunity(@PathVariable("id") Long id) {
-        return communityService.getCommunity(id);
+    @GetMapping(value = "/{moduleId}")
+    public CommunityDto getCommunity(@PathVariable("moduleId") String moduleId) {
+        return communityService.getCommunity(moduleId);
     }
 
 //    /**
@@ -82,38 +98,63 @@ public class CommunityController {
     /**
      * Get all ratings linked to a community
      *
-     * @param id   id of the community
-     * @param page page index
-     * @param size number of ratings per page
+     * @param moduleId of the community
+     * @param page     page index
+     * @param size     number of ratings per page
      * @return Page of ratings
      */
-    @GetMapping(value = "/{id}/ratings", params = {"page", "size"})
-    public Page<RatingDto> getCommunityRatings(@PathVariable("id") Long id,
-        @RequestParam("page") int page, @RequestParam("size") int size) {
-        return communityService.getCommunityRatings(id, page, size);
+    @GetMapping(value = "/{moduleId}/ratings", params = {"page", "size"})
+    public Page<RatingDto> getCommunityRatings(@PathVariable("moduleId") String moduleId,
+                                               @RequestParam("page") int page, @RequestParam("size") int size, @RequestParam("sortByMostLiked") Optional<Boolean> sortByMostLiked) {
+        return communityService.getCommunityRatings(moduleId, page, size, sortByMostLiked);
     }
 
-    @GetMapping(value = "/{id}/ratings/average")
-    public RatingAverage getCommunityRatingAverage(@PathVariable("id") Long id) {
-        return communityService.getCommunityRatingAverage(id);
+    @GetMapping(value = "/{moduleId}/ratings/average")
+    public RatingAverage getCommunityRatingAverage(@PathVariable("moduleId") String moduleId) {
+        return communityService.getCommunityRatingAverage(moduleId);
     }
 
-    @PostMapping(value = "/{id}/ratings")
-    public RatingDto rateCommunity(@PathVariable("id") Long id, @RequestBody RatingDto ratingDto) {
+    @PostMapping(value = "/{moduleId}/ratings")
+    public RatingDto rateCommunity(@PathVariable("moduleId") String moduleId, @RequestBody RatingDto ratingDto) {
         // TODO: provide actual username
         UserDetails principal =
-            (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return communityService.createCommunityRating(id, ratingDto, principal.getUsername());
+                (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return communityService.createCommunityRating(moduleId, ratingDto, principal.getUsername());
     }
 
     /**
      * Delete a community.
      *
-     * @param id id of the community to be deleted
+     * @param moduleId of the community to be deleted
      */
-    @DeleteMapping(value = "/{id}")
-    public void deleteCommunity(@PathVariable("id") Long id) {
+    @DeleteMapping(value = "/{moduleId}")
+    public void deleteCommunity(@PathVariable("moduleId") String moduleId) {
         //TODO: only allowed with specific rights. might be removed for production
-        communityService.deleteCommunity(id);
+        communityService.deleteCommunity(moduleId);
+    }
+
+    @PostMapping(value = "/{moduleId}/posts")
+    public PostDto createPost(@PathVariable("moduleId") String moduleId, @Valid @RequestBody PostDto postDto) {
+        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return communityService.createPost(moduleId, postDto, principal.getUsername());
+    }
+
+    @GetMapping(value = "/{moduleId}/posts", params = { "page", "size" })
+    public Page<PostDto> getCommunityPosts(@PathVariable("moduleId") String moduleId, @RequestParam("page") int page,
+            @RequestParam("size") int size) {
+        return communityService.getCommunityPosts(moduleId, page, size);
+    }
+    // TODO: Impl. Delete Post in another user story
+    // @DeleteMapping(value = "/{moduleId}/posts/{postId}")
+    // public void deletePost(@PathVariable String moduleId, @PathVariable Long postId) {
+    //     UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    //     communityService.deletePost(moduleId, postId, principal.getUsername());
+    // }
+
+    @PostMapping(value = "/{moduleId}/posts/{postId}/comments")
+    public CommentDto createPostComment(@PathVariable String moduleId, @PathVariable Long postId,
+        @Valid @RequestBody CommentDto commentDto) {
+        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return communityService.createComment(moduleId, postId, commentDto, principal.getUsername());
     }
 }

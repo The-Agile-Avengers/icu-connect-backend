@@ -8,7 +8,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Mapper(componentModel = "spring", uses = {MappingService.class, CommunityMapper.class}, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
+@Mapper(componentModel = "spring", uses = {MappingService.class, UserMapper.class}, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public abstract class RatingMapper {
 
 

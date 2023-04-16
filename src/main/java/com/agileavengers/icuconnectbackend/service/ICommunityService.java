@@ -1,24 +1,37 @@
 package com.agileavengers.icuconnectbackend.service;
 
+import com.agileavengers.icuconnectbackend.model.dto.CommentDto;
 import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
+import com.agileavengers.icuconnectbackend.model.dto.PostDto;
 import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
 import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
 import org.springframework.data.domain.Page;
+
+import java.util.Optional;
 
 public interface ICommunityService {
     CommunityDto setupExampleCommunity();
 
     CommunityDto createCommunity(CommunityDto communityDto);
 
-    Page<CommunityDto> getCommunities(int page, int size);
+    Page<CommunityDto> getCommunities(int page, int size, Optional<String> search);
 
-    CommunityDto getCommunity(Long id);
+    CommunityDto getCommunity(String moduleId);
 
-    Page<RatingDto> getCommunityRatings(Long id, int page, int size);
+    Page<RatingDto> getCommunityRatings(String moduleId, int page, int size, Optional<Boolean> sortByMostLiked);
 
-    RatingDto createCommunityRating(Long id, RatingDto ratingDto, String username);
+    RatingDto createCommunityRating(String moduleId, RatingDto ratingDto, String username);
 
-    RatingAverage getCommunityRatingAverage(Long id);
+    RatingAverage getCommunityRatingAverage(String moduleId);
 
-    void deleteCommunity(long id);
+    void deleteCommunity(String moduleId);
+    
+    PostDto createPost(String moduleId, PostDto postDto, String username);
+
+    Page<PostDto> getCommunityPosts(String moduleId, int pageNumber, int size);
+
+    // TODO: Impl. Delete Post in another user story
+    // void deletePost(String moduleId, Long postId, String username);
+
+    CommentDto createComment(String moduleId, Long postId, CommentDto commentDto, String username);
 }
