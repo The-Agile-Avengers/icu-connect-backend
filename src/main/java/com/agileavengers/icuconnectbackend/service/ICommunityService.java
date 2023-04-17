@@ -30,8 +30,7 @@ public interface ICommunityService {
 
     Page<PostDto> getCommunityPosts(String moduleId, int pageNumber, int size);
 
-    // TODO: Impl. Delete Post in another user story
-    // void deletePost(String moduleId, Long postId, String username);
+    void deletePost(String moduleId, Long postId, String username);
 
     CommentDto createComment(String moduleId, Long postId, CommentDto commentDto, String username);
 }

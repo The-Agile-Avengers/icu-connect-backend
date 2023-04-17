@@ -35,18 +35,8 @@ import com.agileavengers.icuconnectbackend.repository.PostRepository;
 import com.agileavengers.icuconnectbackend.repository.RatingRepository;
 import com.agileavengers.icuconnectbackend.repository.UserRepository;
 import com.agileavengers.icuconnectbackend.service.ICommunityService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CommunityService implements ICommunityService {
@@ -246,20 +236,28 @@ public class CommunityService implements ICommunityService {
         return postPage.map(postMapper::toDto);
     }
 
-    // TODO: Delete childs (comments) before deleting post
-    // @Override
-    // public void deletePost(String moduleId, Long postId, String username) {
-    //     Optional<User> user = userRepository.findByUsername(username);
-    //     if (user.isEmpty()) {
-    //         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "");
-    //     }
+    @Override
+    public void deletePost(String moduleId, Long postId, String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "");
+        }
 
-    //     if (postRepository.existsByCommunity_ModuleIdAndId(moduleId, postId)) {
-    //         postRepository.deletePostByIdAndCreator_Id(postId, user.get().getId());
-    //     } else {
-    //         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "entity not found");
-    //     }
-    // }
+        Optional<Post> post = postRepository.findByIdAndCommunity_ModuleId(postId, moduleId);
+        if (post.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "entity not found");
+        }   
+
+        if (!post.get().getCreator().equals(user.get())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized to delete this post. This post was created by another user.");
+        }
+
+        List<Comment> commentsToDelete = commentRepository.findAllByPost_Id(postId);
+        for (Comment comment : commentsToDelete) {
+            commentRepository.delete(comment);
+        }
+        postRepository.delete(post.get());
+    }
 
     @Override
     public CommentDto createComment(String moduleId, Long postId, CommentDto commentDto, String username) {

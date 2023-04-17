@@ -18,11 +18,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -685,5 +685,51 @@ class ICommunityServiceTest {
         Assertions.assertEquals(1, result.getTotalPages(), "Result should contain one page.");
         Assertions.assertEquals(2, result.getContent().size(), "Result should contain two elements.");
         Assertions.assertEquals(commentDto, result.getContent().get(0).getCommentList().get(0), "First post of result should contain 1 comment");
+    }
+
+    @Test
+    public void deletePostNoComments() {
+        Instructor instructor = Instructor.builder().id(10L).name("Test Instructor").build();
+        Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
+
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
+
+        Post post = Post.builder().id(1L).creator(user1).community(community).title("Test Title 1").text("Test text 1").creation(new Timestamp(System.currentTimeMillis())).build();
+
+        when(userRepository.findByUsername(user1.getUsername())).thenAnswer(i -> Optional.of(user1));
+        when(postRepository.findByIdAndCommunity_ModuleId(post.getId(), community.getModuleId())).thenAnswer(i -> Optional.of(post));
+        when(commentRepository.findAllByPost_Id(post.getId())).thenAnswer(i -> List.of());
+
+        communityService.deletePost(community.getModuleId(), post.getId(), user1.getUsername());
+
+        verify(commentRepository, times(0)).delete(Mockito.any(Comment.class));
+        verify(postRepository, times(1)).delete(post);
+
+
+    }
+
+    @Test
+    public void deletePostWithComments() {
+        Instructor instructor = Instructor.builder().id(10L).name("Test Instructor").build();
+        Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
+
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
+
+        Post post = Post.builder().id(1L).creator(user1).community(community).title("Test Title 1").text("Test text 1").creation(new Timestamp(System.currentTimeMillis())).build();
+
+        Comment comment = Comment.builder().id(1L).creation(new Timestamp(System.currentTimeMillis())).creator(user1).text("Test comment text").post(post).build();
+
+        when(userRepository.findByUsername(user1.getUsername())).thenAnswer(i -> Optional.of(user1));
+        when(postRepository.findByIdAndCommunity_ModuleId(post.getId(), community.getModuleId())).thenAnswer(i -> Optional.of(post));
+        when(commentRepository.findAllByPost_Id(post.getId())).thenAnswer(i -> List.of(comment));
+
+        InOrder inOrder = Mockito.inOrder(commentRepository, postRepository);
+
+        communityService.deletePost(community.getModuleId(), post.getId(), user1.getUsername());
+
+        inOrder.verify(commentRepository, times(1)).delete(comment);
+        inOrder.verify(postRepository, times(1)).delete(post);
+
+
     }
 }

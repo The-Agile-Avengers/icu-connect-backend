@@ -144,12 +144,12 @@ public class CommunityController {
             @RequestParam("size") int size) {
         return communityService.getCommunityPosts(moduleId, page, size);
     }
-    // TODO: Impl. Delete Post in another user story
-    // @DeleteMapping(value = "/{moduleId}/posts/{postId}")
-    // public void deletePost(@PathVariable String moduleId, @PathVariable Long postId) {
-    //     UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    //     communityService.deletePost(moduleId, postId, principal.getUsername());
-    // }
+
+    @DeleteMapping(value = "/{moduleId}/posts/{postId}")
+    public void deletePost(@PathVariable String moduleId, @PathVariable Long postId) {
+        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        communityService.deletePost(moduleId, postId, principal.getUsername());
+    }
 
     @PostMapping(value = "/{moduleId}/posts/{postId}/comments")
     public CommentDto createPostComment(@PathVariable String moduleId, @PathVariable Long postId,
