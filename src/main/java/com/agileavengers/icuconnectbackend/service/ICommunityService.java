@@ -20,6 +20,8 @@ public interface ICommunityService {
 
     Page<RatingDto> getCommunityRatings(String moduleId, int page, int size, Optional<Boolean> sortByMostLiked);
 
+    RatingDto thumbsUp(String moduleId, Long ratingId, String username);
+
     RatingDto createCommunityRating(String moduleId, RatingDto ratingDto, String username);
 
     RatingAverage getCommunityRatingAverage(String moduleId);

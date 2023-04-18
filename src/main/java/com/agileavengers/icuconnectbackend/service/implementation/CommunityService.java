@@ -3,6 +3,7 @@ package com.agileavengers.icuconnectbackend.service.implementation;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -151,6 +152,24 @@ public class CommunityService implements ICommunityService {
         }
         Page<Rating> ratingPage = ratingRepository.findAllByCommunity_ModuleId(moduleId, pageable);
         return ratingPage.map(ratingMapper::toDto);
+    }
+
+    @Override
+    public RatingDto thumbsUp(String moduleId, Long ratingId, String username) {
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "user does not exist");
+        }
+
+        Optional<Rating> ratingOptional = ratingRepository.findByIdAndCommunity_ModuleId(ratingId, moduleId);
+        if (ratingOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "rating does not exist");
+        }
+
+        User user = userOptional.get();
+        Rating rating = ratingOptional.get();
+
+        return ratingMapper.toDto(ratingRepository.save(rating.modifyThumbsUp(user)));
     }
 
     @Override

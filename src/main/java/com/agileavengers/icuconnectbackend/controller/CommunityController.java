@@ -157,4 +157,10 @@ public class CommunityController {
         UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return communityService.createComment(moduleId, postId, commentDto, principal.getUsername());
     }
+
+    @PostMapping(value = "/{moduleId}/ratings/{ratingId}/thumbsUp")
+    public RatingDto thumbsUp(@PathVariable("moduleId") String moduleId, @PathVariable("ratingId") Long ratingId, @RequestBody RatingDto ratingDto) {
+        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return communityService.thumbsUp(moduleId, ratingId, principal.getUsername());
+    }
 }
