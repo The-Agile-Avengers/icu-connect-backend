@@ -20,14 +20,10 @@ public class Comment {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
     private User creator;
 
     private Timestamp creation;
 
-    // @WIP: Annotations for when a post is deleted.
-    // @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    // @JoinColumn(name = "post_id")
     @ManyToOne
     private Post post;
 
