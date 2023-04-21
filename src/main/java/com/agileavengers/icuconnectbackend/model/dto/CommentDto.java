@@ -20,7 +20,7 @@ import jakarta.validation.constraints.NotBlank;
 public class CommentDto {
     private Long id;
 
-    private UserDto creator;
+    private UserDto user;
 
     private Timestamp creation;
 
