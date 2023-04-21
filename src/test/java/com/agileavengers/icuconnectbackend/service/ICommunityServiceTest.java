@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -22,7 +23,6 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -729,7 +729,31 @@ class ICommunityServiceTest {
 
         inOrder.verify(commentRepository, times(1)).delete(comment);
         inOrder.verify(postRepository, times(1)).delete(post);
+    }
 
+    @Test
+    public void thumbsUpCounterUpdate() {
+        Instructor instructor = Instructor.builder().id(10L).name("Test Instructor").build();
+        Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
 
+        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
+
+        Rating rating = Rating.builder().creator(user1).community(community).content(5.0).workload(3.0).teaching(2.0).thumbsUp(new HashSet<User>()).build();
+
+        when(userRepository.findByUsername(user1.getUsername())).thenAnswer(i -> Optional.of(user1));
+        
+        when(ratingRepository.findByIdAndCommunity_ModuleId(rating.getId(), community.getModuleId())).thenAnswer(i -> Optional.of(rating));
+        
+        when(ratingRepository.save(Mockito.any(Rating.class)))
+        .thenAnswer(i -> rating);
+        
+        
+        RatingDto result = communityService.thumbsUp(community.getModuleId(), rating.getId(), user1.getUsername());
+
+        Assertions.assertSame(1, result.getThumbsUp(), "Result should have one thumbs up");
+
+        result = communityService.thumbsUp(community.getModuleId(), rating.getId(), user1.getUsername());
+
+        Assertions.assertSame(0, result.getThumbsUp(), "Result should have zero thumbs up");
     }
 }

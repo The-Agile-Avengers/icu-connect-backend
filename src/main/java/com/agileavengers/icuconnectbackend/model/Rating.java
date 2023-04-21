@@ -34,4 +34,13 @@ public class Rating {
 
     @ManyToMany
     private Set<User> thumbsUp;
+
+    public Rating modifyThumbsUp(User user) {
+        if (this.thumbsUp.contains(user)) {
+            this.thumbsUp.remove(user);
+        } else {
+            this.thumbsUp.add(user);
+        }
+        return this;
+    }
 }
