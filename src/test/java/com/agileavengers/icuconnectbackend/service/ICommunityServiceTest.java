@@ -578,7 +578,7 @@ class ICommunityServiceTest {
                         return new PageImpl<>(postList.subList(argument.getPageNumber(), argument.getPageSize()), argument, postList.size());
                 });
 
-        Page<PostDto> result = communityService.getCommunityPosts(community.getModuleId(), 0,2);
+        Page<PostDto> result = communityService.getCommunityPosts(community.getModuleId(), 0,2, Optional.empty());
 
         Assertions.assertNotNull(result, "Page should not be null.");
         Assertions.assertEquals(2L, result.getTotalElements(), "Result should contain two elements.");
@@ -590,11 +590,39 @@ class ICommunityServiceTest {
     void getCommunityPostsEmpty() {
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
-            communityService.getCommunityPosts("noExist", 0, 2);
+            communityService.getCommunityPosts("noExist", 0, 2, Optional.empty());
         }, "ResponeStatusException");
 
         Assertions.assertEquals("community does not exist", exception.getReason());
     }
+
+//    @Test
+//    void getCommunityPostsYear() {
+//        Instructor instructor = Instructor.builder().id(10L).name("Test Instructor").build();
+//        Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
+//        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
+//        User user2 = User.builder().username("Test2").password("anything").id(3L).build();
+//        Post post = Post.builder().creator(user1).community(community).title("Test Title 1").text("Test text 1").creation(Timestamp.valueOf("2007-09-23 10:10:10.0")).build();
+//        Post post2 = Post.builder().creator(user2).community(community).title("Test Title 2").text("Test text 2").creation(Timestamp.valueOf("2008-09-23 10:10:10.0")).build();
+//
+//        List<Post> postList = List.of(post,post2);
+//
+//        when(communityRepository.findCommunityByModuleId(community.getModuleId()))
+//                .thenAnswer(i -> Optional.of(community));
+//
+//        when(postRepository.findAllByCreationContaining(Mockito.anyString(), Mockito.any(Pageable.class)))
+//                .thenAnswer(i -> {
+//                    Pageable argument = (Pageable) i.getArguments()[1];
+//                    return new PageImpl<>(postList.subList(argument.getPageNumber(), argument.getPageSize()), argument, postList.size());
+//                });
+//
+//        Page<PostDto> result = communityService.getCommunityPosts(community.getModuleId(), 0,2, Optional.empty());
+//
+//        Assertions.assertNotNull(result, "Page should not be null.");
+//        Assertions.assertEquals(2L, result.getTotalElements(), "Result should contain two elements.");
+//        Assertions.assertEquals(1, result.getTotalPages(), "Result should contain one page.");
+//        Assertions.assertEquals(2, result.getContent().size(), "Result should contain two elements.");
+//    }
 
     @Test
     void createCommentExistingPost() {
@@ -677,7 +705,7 @@ class ICommunityServiceTest {
 
         communityService.createComment(community.getModuleId(), post.getId(), commentDto, user1.getUsername());
 
-        Page<PostDto> result = communityService.getCommunityPosts(community.getModuleId(), 0,2);
+        Page<PostDto> result = communityService.getCommunityPosts(community.getModuleId(), 0,2, Optional.empty());
 
 
         Assertions.assertNotNull(result, "Page should not be null.");
