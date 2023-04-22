@@ -18,8 +18,10 @@ public abstract class CommentMapper {
         this.mappingService = mappingService;
     }
 
+    @Mapping(target = "user", source = "creator")
     public abstract CommentDto toDto(Comment comment);
 
     @Mapping(target = "post", expression = "java(null)")
+    @Mapping(target = "creator", source = "user")
     public abstract Comment fromDto(CommentDto commentDto);
 }

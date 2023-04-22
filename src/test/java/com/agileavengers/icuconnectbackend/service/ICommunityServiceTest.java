@@ -550,7 +550,7 @@ class ICommunityServiceTest {
 
 
         Assertions.assertNotNull(result, "Returned object should not be null");
-        Assertions.assertEquals(userDto, result.getCreator(), "Fields should not have changed");
+        Assertions.assertEquals(userDto, result.getUser(), "Fields should not have changed");
         Assertions.assertEquals(post.getText(), result.getText(), "Fields should not have changed");
         Assertions.assertEquals(post.getTitle(), result.getTitle(), "Fields should not have changed");
         Assertions.assertNotNull(result.getId(), "Id should not be null");
@@ -615,7 +615,7 @@ class ICommunityServiceTest {
         PostDto postDto = PostDto.builder().id(2L).title("Question 1 Title").text("Question 1 Text")
         .build();
 
-        CommentDto commentDto = CommentDto.builder().id(1L).creation(new Timestamp(System.currentTimeMillis())).creator(userDto).text("Test comment text").build();
+        CommentDto commentDto = CommentDto.builder().id(1L).creation(new Timestamp(System.currentTimeMillis())).user(userDto).text("Test comment text").build();
 
 
         when(postRepository.findByIdAndCommunity_ModuleId(postDto.getId(), community.getModuleId()))
@@ -631,7 +631,7 @@ class ICommunityServiceTest {
         CommentDto result = communityService.createComment(community.getModuleId(), post.getId(), commentDto, user1.getUsername());
 
         Assertions.assertNotNull(result, "Returned object should not be null");
-        Assertions.assertEquals(userDto, result.getCreator(), "Fields should not have changed");
+        Assertions.assertEquals(userDto, result.getUser(), "Fields should not have changed");
         Assertions.assertEquals(commentDto.getText(), result.getText(), "Fields should not have changed");
         Assertions.assertNotNull(result.getId(), "Id should not be null");
 
@@ -648,7 +648,7 @@ class ICommunityServiceTest {
         
         UserDto userDto = UserDto.builder().id(user1.getId()).username(user1.getUsername()).build();
 
-        CommentDto commentDto = CommentDto.builder().id(1L).creation(new Timestamp(System.currentTimeMillis())).creator(userDto).text("Test comment text").build();
+        CommentDto commentDto = CommentDto.builder().id(1L).creation(new Timestamp(System.currentTimeMillis())).user(userDto).text("Test comment text").build();
 
         Comment comment = Comment.builder().id(1L).creation(new Timestamp(System.currentTimeMillis())).creator(user1).text("Test comment text").post(post).build();
 

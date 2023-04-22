@@ -21,6 +21,7 @@ public abstract class RatingMapper {
 
 
     @Mapping(target = "thumbsUp", expression = "java(mappingService.getRatingThumbsUp(rating))")
+    @Mapping(target = "user", source = "creator")
     public abstract RatingDto toDto(Rating rating);
 
     @Mapping(target = "creator", expression = "java(null)")
