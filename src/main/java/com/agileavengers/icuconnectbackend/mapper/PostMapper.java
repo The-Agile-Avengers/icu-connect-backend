@@ -27,7 +27,9 @@ public abstract class PostMapper {
     }
 
     @Mapping(target = "commentList", expression = "java(commentRepository.findAllByPost_Id(post.getId()).stream().map(commentMapper::toDto).collect(Collectors.toList()))")
+    @Mapping(target = "user", source = "creator")
     public abstract PostDto toDto(Post post);
-    
+
+    @Mapping(target = "creator", source = "user")
     public abstract Post fromDto(PostDto postDto);
 }
