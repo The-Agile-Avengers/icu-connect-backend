@@ -284,16 +284,17 @@ class UserServiceTest {
         when(userRepository.findByUsername(user.getUsername())).thenAnswer(i -> Optional.of(user));
         when(userRepository.save(Mockito.any(User.class)))
                 .thenAnswer(i -> i.getArguments()[0]);
-        UserDetailDto details = UserDetailDto.builder().username("New Username").email("Anything@uzh.ch").studyArea("Computer Science").build();
+        UserDetailDto details = UserDetailDto.builder().username("New Username").email("Anything@uzh.ch").studyArea("Computer Science").avatar("10").build();
 
         UserDetailDto result = userService.updateUser(user.getUsername(), details);
 
         verify(userRepository, times(1)).findByUsername(argThat(
                 x -> true ));
 
-        Assertions.assertNotNull(result, "Returned user shoudld not be null");
+        Assertions.assertNotNull(result, "Returned user should not be null");
         Assertions.assertEquals(details.getUsername(), result.getUsername(), "Should be new username.");
         Assertions.assertEquals(details.getEmail(), result.getEmail(), "Should be new email.");
         Assertions.assertEquals(details.getStudyArea(), result.getStudyArea(), "Should be new study area.");
+        Assertions.assertEquals(details.getAvatar(), result.getAvatar(), "Should be new avatar.");
     }
 }

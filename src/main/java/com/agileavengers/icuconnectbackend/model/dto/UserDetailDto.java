@@ -17,4 +17,6 @@ public class UserDetailDto {
     private String email;
 
     private String studyArea;
+
+    private String avatar;
 }

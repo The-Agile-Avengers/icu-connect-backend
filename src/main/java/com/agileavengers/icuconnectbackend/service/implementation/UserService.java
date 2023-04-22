@@ -117,8 +117,9 @@ public class UserService implements IUserService {
         if (update.getStudyArea() != null) {
             user.setStudyArea(update.getStudyArea());
         }
+        if (update.getAvatar() != null) {
+            user.setAvatar(update.getAvatar());
+        }
         return user;
-        // TODO: add avatar
-
     }
 }
