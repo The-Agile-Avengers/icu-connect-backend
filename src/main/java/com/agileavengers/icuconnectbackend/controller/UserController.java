@@ -32,7 +32,7 @@ public class UserController {
     UserDetailDto updateUser(@RequestBody UserDetailDto userDetailDto) {
         UserDetails principal =
                 (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userService.getUser(principal.getUsername());
+        return userService.updateUser(principal.getUsername(), userDetailDto);
     }
 
     @PutMapping(value = "/communities/{moduleId}")
