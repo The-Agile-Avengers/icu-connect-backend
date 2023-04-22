@@ -1,19 +1,11 @@
 package com.agileavengers.icuconnectbackend.service;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
+import com.agileavengers.icuconnectbackend.mapper.*;
+import com.agileavengers.icuconnectbackend.model.*;
+import com.agileavengers.icuconnectbackend.model.dto.*;
+import com.agileavengers.icuconnectbackend.repository.*;
+import com.agileavengers.icuconnectbackend.service.implementation.CommunityService;
+import com.agileavengers.icuconnectbackend.service.implementation.MappingService;
 import org.junit.gen5.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,45 +16,19 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.agileavengers.icuconnectbackend.mapper.CommentMapper;
-import com.agileavengers.icuconnectbackend.mapper.CommunityMapper;
-import com.agileavengers.icuconnectbackend.mapper.InstructorMapper;
-import com.agileavengers.icuconnectbackend.mapper.PostMapper;
-import com.agileavengers.icuconnectbackend.mapper.RatingMapper;
-import com.agileavengers.icuconnectbackend.mapper.RatingMapperImpl;
-import com.agileavengers.icuconnectbackend.mapper.UserMapper;
-import com.agileavengers.icuconnectbackend.model.Comment;
-import com.agileavengers.icuconnectbackend.model.Community;
-import com.agileavengers.icuconnectbackend.model.Instructor;
-import com.agileavengers.icuconnectbackend.model.Post;
-import com.agileavengers.icuconnectbackend.model.Rating;
-import com.agileavengers.icuconnectbackend.model.User;
-import com.agileavengers.icuconnectbackend.model.dto.CommentDto;
-import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
-import com.agileavengers.icuconnectbackend.model.dto.InstructorDto;
-import com.agileavengers.icuconnectbackend.model.dto.PostDto;
-import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
-import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
-import com.agileavengers.icuconnectbackend.model.dto.UserDto;
-import com.agileavengers.icuconnectbackend.repository.CommentRepository;
-import com.agileavengers.icuconnectbackend.repository.CommunityRepository;
-import com.agileavengers.icuconnectbackend.repository.InstructorRepository;
-import com.agileavengers.icuconnectbackend.repository.PostRepository;
-import com.agileavengers.icuconnectbackend.repository.RatingRepository;
-import com.agileavengers.icuconnectbackend.repository.UserRepository;
-import com.agileavengers.icuconnectbackend.service.implementation.CommunityService;
-import com.agileavengers.icuconnectbackend.service.implementation.MappingService;
+import java.sql.Timestamp;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.*;
 
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
 @SpringBootTest()
@@ -595,34 +561,6 @@ class ICommunityServiceTest {
 
         Assertions.assertEquals("community does not exist", exception.getReason());
     }
-
-//    @Test
-//    void getCommunityPostsYear() {
-//        Instructor instructor = Instructor.builder().id(10L).name("Test Instructor").build();
-//        Community community = Community.builder().id(1L).name("Test Community").instructor(instructor).moduleId("UZH1234").build();
-//        User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
-//        User user2 = User.builder().username("Test2").password("anything").id(3L).build();
-//        Post post = Post.builder().creator(user1).community(community).title("Test Title 1").text("Test text 1").creation(Timestamp.valueOf("2007-09-23 10:10:10.0")).build();
-//        Post post2 = Post.builder().creator(user2).community(community).title("Test Title 2").text("Test text 2").creation(Timestamp.valueOf("2008-09-23 10:10:10.0")).build();
-//
-//        List<Post> postList = List.of(post,post2);
-//
-//        when(communityRepository.findCommunityByModuleId(community.getModuleId()))
-//                .thenAnswer(i -> Optional.of(community));
-//
-//        when(postRepository.findAllByCreationContaining(Mockito.anyString(), Mockito.any(Pageable.class)))
-//                .thenAnswer(i -> {
-//                    Pageable argument = (Pageable) i.getArguments()[1];
-//                    return new PageImpl<>(postList.subList(argument.getPageNumber(), argument.getPageSize()), argument, postList.size());
-//                });
-//
-//        Page<PostDto> result = communityService.getCommunityPosts(community.getModuleId(), 0,2, Optional.empty());
-//
-//        Assertions.assertNotNull(result, "Page should not be null.");
-//        Assertions.assertEquals(2L, result.getTotalElements(), "Result should contain two elements.");
-//        Assertions.assertEquals(1, result.getTotalPages(), "Result should contain one page.");
-//        Assertions.assertEquals(2, result.getContent().size(), "Result should contain two elements.");
-//    }
 
     @Test
     void createCommentExistingPost() {
