@@ -141,8 +141,8 @@ public class CommunityController {
 
     @GetMapping(value = "/{moduleId}/posts", params = { "page", "size" })
     public Page<PostDto> getCommunityPosts(@PathVariable("moduleId") String moduleId, @RequestParam("page") int page,
-            @RequestParam("size") int size) {
-        return communityService.getCommunityPosts(moduleId, page, size);
+            @RequestParam("size") int size, @RequestParam("year") Optional<Integer> year) {
+        return communityService.getCommunityPosts(moduleId, page, size, year);
     }
 
     @DeleteMapping(value = "/{moduleId}/posts/{postId}")

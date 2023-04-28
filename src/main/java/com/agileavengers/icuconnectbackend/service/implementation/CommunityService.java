@@ -1,42 +1,22 @@
 package com.agileavengers.icuconnectbackend.service.implementation;
 
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
+import com.agileavengers.icuconnectbackend.mapper.*;
+import com.agileavengers.icuconnectbackend.model.*;
+import com.agileavengers.icuconnectbackend.model.dto.*;
+import com.agileavengers.icuconnectbackend.repository.*;
+import com.agileavengers.icuconnectbackend.service.ICommunityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.agileavengers.icuconnectbackend.mapper.CommentMapper;
-import com.agileavengers.icuconnectbackend.mapper.CommunityMapper;
-import com.agileavengers.icuconnectbackend.mapper.InstructorMapper;
-import com.agileavengers.icuconnectbackend.mapper.PostMapper;
-import com.agileavengers.icuconnectbackend.mapper.RatingMapper;
-import com.agileavengers.icuconnectbackend.model.Comment;
-import com.agileavengers.icuconnectbackend.model.Community;
-import com.agileavengers.icuconnectbackend.model.Instructor;
-import com.agileavengers.icuconnectbackend.model.Post;
-import com.agileavengers.icuconnectbackend.model.Rating;
-import com.agileavengers.icuconnectbackend.model.User;
-import com.agileavengers.icuconnectbackend.model.dto.CommentDto;
-import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
-import com.agileavengers.icuconnectbackend.model.dto.PostDto;
-import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
-import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
-import com.agileavengers.icuconnectbackend.repository.CommentRepository;
-import com.agileavengers.icuconnectbackend.repository.CommunityRepository;
-import com.agileavengers.icuconnectbackend.repository.InstructorRepository;
-import com.agileavengers.icuconnectbackend.repository.PostRepository;
-import com.agileavengers.icuconnectbackend.repository.RatingRepository;
-import com.agileavengers.icuconnectbackend.repository.UserRepository;
-import com.agileavengers.icuconnectbackend.service.ICommunityService;
-import org.springframework.data.domain.Sort;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -245,13 +225,18 @@ public class CommunityService implements ICommunityService {
     }
 
     @Override
-    public Page<PostDto> getCommunityPosts(String moduleId, int pageNumber, int size) {
+    public Page<PostDto> getCommunityPosts(String moduleId, int pageNumber, int size, Optional<Integer> year) {
         Pageable page = PageRequest.of(pageNumber, size);
         Optional<Community> community = communityRepository.findCommunityByModuleId(moduleId);
         if (community.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community does not exist");
         }
-        Page<Post> postPage = postRepository.findAllByCommunity_ModuleId(moduleId, page);
+        Page<Post> postPage;
+        if (year.isPresent()) {
+            postPage = postRepository.findAllByCreationBetween(Timestamp.valueOf(year.get() + "-01-01 00:00:00.0"), Timestamp.valueOf(year.get() + "-12-31 23:59:59.9"), page);
+        } else {
+            postPage = postRepository.findAllByCommunity_ModuleId(moduleId, page);
+        }
         return postPage.map(postMapper::toDto);
     }
 

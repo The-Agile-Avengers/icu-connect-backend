@@ -30,7 +30,7 @@ public interface ICommunityService {
     
     PostDto createPost(String moduleId, PostDto postDto, String username);
 
-    Page<PostDto> getCommunityPosts(String moduleId, int pageNumber, int size);
+    Page<PostDto> getCommunityPosts(String moduleId, int pageNumber, int size, Optional<Integer> year);
 
     void deletePost(String moduleId, Long postId, String username);
 
