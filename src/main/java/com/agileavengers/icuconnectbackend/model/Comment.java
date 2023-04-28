@@ -22,6 +22,7 @@ public class Comment {
     @ManyToOne
     private User creator;
 
+    @Temporal(TemporalType.TIMESTAMP)
     private Timestamp creation;
 
     @ManyToOne

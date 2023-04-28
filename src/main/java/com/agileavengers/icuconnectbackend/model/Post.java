@@ -26,6 +26,7 @@ public class Post {
     @ManyToOne
     private Community community;
 
+    @Temporal(TemporalType.TIMESTAMP)
     private Timestamp creation;
 
     private String title;
