@@ -269,7 +269,8 @@ class UserServiceTest {
 
         UserDetailDto result = userService.updateUser(user.getUsername(), details);
 
-        verify(userRepository, times(1)).findByUsername(argThat(
+        // first time to get user, second time to verify user does not already exist
+        verify(userRepository, times(2)).findByUsername(argThat(
                 x -> true ));
 
         Assertions.assertNotNull(result, "Returned user shoudld not be null");
@@ -288,7 +289,8 @@ class UserServiceTest {
 
         UserDetailDto result = userService.updateUser(user.getUsername(), details);
 
-        verify(userRepository, times(1)).findByUsername(argThat(
+        // first time to get user, second time to verify user does not already exist
+        verify(userRepository, times(2)).findByUsername(argThat(
                 x -> true ));
 
         Assertions.assertNotNull(result, "Returned user should not be null");
