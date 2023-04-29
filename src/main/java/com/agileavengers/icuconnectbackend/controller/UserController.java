@@ -4,6 +4,7 @@ import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
 import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
 import com.agileavengers.icuconnectbackend.model.dto.UserDetailDto;
 import com.agileavengers.icuconnectbackend.service.IUserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,7 @@ public class UserController {
     }
 
     @PutMapping(value = "")
-    UserDetailDto updateUser(@RequestBody UserDetailDto userDetailDto) {
+    ResponseEntity<UserDetailDto> updateUser(@RequestBody UserDetailDto userDetailDto) {
         UserDetails principal =
                 (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userService.updateUser(principal.getUsername(), userDetailDto);

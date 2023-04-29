@@ -1,5 +1,6 @@
 package com.agileavengers.icuconnectbackend.service.implementation;
 
+import com.agileavengers.icuconnectbackend.config.JwtTokenUtil;
 import com.agileavengers.icuconnectbackend.mapper.CommunityMapper;
 import com.agileavengers.icuconnectbackend.mapper.RatingMapper;
 import com.agileavengers.icuconnectbackend.mapper.RatingMapperImpl;
@@ -15,6 +16,8 @@ import com.agileavengers.icuconnectbackend.repository.CommunityRepository;
 import com.agileavengers.icuconnectbackend.repository.RatingRepository;
 import com.agileavengers.icuconnectbackend.repository.UserRepository;
 import com.agileavengers.icuconnectbackend.service.IUserService;
+import com.agileavengers.icuconnectbackend.service.JwtUserDetailsService;
+import org.apache.coyote.Response;
 import org.junit.gen5.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,9 +27,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
@@ -42,6 +47,10 @@ import static org.mockito.Mockito.*;
 class UserServiceTest {
 
     IUserService userService;
+
+    JwtTokenUtil jwtTokenUtil;
+
+    JwtUserDetailsService userDetailsService;
 
     @Mock
     CommunityRepository communityRepository;
@@ -75,7 +84,9 @@ class UserServiceTest {
         userMapper.setMappingService(mappingService);
         RatingMapper ratingMapper = new RatingMapperImpl(userMapper);
         ratingMapper.setMappingService(mappingService);
-        this.userService = new UserService(communityMapper, ratingMapper, userMapper, communityRepository, userRepository, ratingRepository);
+        jwtTokenUtil = new JwtTokenUtil();
+        userDetailsService = new JwtUserDetailsService(userRepository, userMapper);
+        this.userService = new UserService(communityMapper, ratingMapper, userMapper, communityRepository, userRepository, ratingRepository, userDetailsService, jwtTokenUtil);
     }
 
     @Test
@@ -267,15 +278,20 @@ class UserServiceTest {
                 .thenAnswer(i -> i.getArguments()[0]);
         UserDetailDto details = UserDetailDto.builder().username("New Username").build();
 
-        UserDetailDto result = userService.updateUser(user.getUsername(), details);
+        ResponseEntity<UserDetailDto> result = userService.updateUser(user.getUsername(), details);
 
         verify(userRepository, times(1)).findByUsername(argThat(
                 x -> true ));
 
+
+
         Assertions.assertNotNull(result, "Returned user shoudld not be null");
-        Assertions.assertEquals(details.getUsername(), result.getUsername(), "Should be new username.");
-        Assertions.assertEquals("test@uzh.ch", result.getEmail(), "Should still be old email.");
-        Assertions.assertNull(result.getStudyArea(), "Should still be old study area.");
+        Assertions.assertTrue(result.hasBody(), "Body should not be null");
+        UserDetailDto body = result.getBody();
+        Assertions.assertEquals(details.getUsername(), body.getUsername(), "Should be new username.");
+        Assertions.assertEquals("test@uzh.ch", body.getEmail(), "Should still be old email.");
+        Assertions.assertNull(body.getStudyArea(), "Should still be old study area.");
+        Assertions.assertTrue(result.getHeaders().containsKey("token"), "Response should contain header with token");
     }
 
     @Test
@@ -286,15 +302,20 @@ class UserServiceTest {
                 .thenAnswer(i -> i.getArguments()[0]);
         UserDetailDto details = UserDetailDto.builder().username("New Username").email("Anything@uzh.ch").studyArea("Computer Science").avatar("10").build();
 
-        UserDetailDto result = userService.updateUser(user.getUsername(), details);
+        User expectedUser = User.builder().username(details.getUsername()).email(details.getEmail()).studyArea(details.getStudyArea()).avatar(details.getAvatar()).password("anything").id(2L).subscriptionSet(null).build();
+        // first call return empty, then return new object
+        when(userRepository.findByUsername(expectedUser.getUsername())).thenReturn(Optional.empty(), Optional.of(expectedUser));
+        ResponseEntity<UserDetailDto> result = userService.updateUser(user.getUsername(), details);
 
-        verify(userRepository, times(1)).findByUsername(argThat(
+        verify(userRepository, times(2)).findByUsername(argThat(
                 x -> true ));
 
         Assertions.assertNotNull(result, "Returned user should not be null");
-        Assertions.assertEquals(details.getUsername(), result.getUsername(), "Should be new username.");
-        Assertions.assertEquals(details.getEmail(), result.getEmail(), "Should be new email.");
-        Assertions.assertEquals(details.getStudyArea(), result.getStudyArea(), "Should be new study area.");
-        Assertions.assertEquals(details.getAvatar(), result.getAvatar(), "Should be new avatar.");
+        Assertions.assertTrue(result.hasBody(), "Body should not be null");
+        UserDetailDto body = result.getBody();
+        Assertions.assertEquals(details.getUsername(), body.getUsername(), "Should be new username.");
+        Assertions.assertEquals(details.getEmail(), body.getEmail(), "Should be new email.");
+        Assertions.assertEquals(details.getStudyArea(), body.getStudyArea(), "Should be new study area.");
+        Assertions.assertEquals(details.getAvatar(), body.getAvatar(), "Should be new avatar.");
     }
 }

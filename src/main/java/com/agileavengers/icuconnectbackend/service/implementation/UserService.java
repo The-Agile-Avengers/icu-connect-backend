@@ -1,5 +1,6 @@
 package com.agileavengers.icuconnectbackend.service.implementation;
 
+import com.agileavengers.icuconnectbackend.config.JwtTokenUtil;
 import com.agileavengers.icuconnectbackend.mapper.CommunityMapper;
 import com.agileavengers.icuconnectbackend.mapper.RatingMapper;
 import com.agileavengers.icuconnectbackend.mapper.UserMapper;
@@ -13,8 +14,13 @@ import com.agileavengers.icuconnectbackend.repository.CommunityRepository;
 import com.agileavengers.icuconnectbackend.repository.RatingRepository;
 import com.agileavengers.icuconnectbackend.repository.UserRepository;
 import com.agileavengers.icuconnectbackend.service.IUserService;
+import com.agileavengers.icuconnectbackend.service.JwtUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -33,16 +39,19 @@ public class UserService implements IUserService {
     UserRepository userRepository;
     RatingRepository ratingRepository;
 
-
+    JwtUserDetailsService userDetailsService;
+    JwtTokenUtil jwtTokenUtil;
 
     @Autowired
-    public UserService(CommunityMapper communityMapper, RatingMapper ratingMapper, UserMapper userMapper, CommunityRepository communityRepository, UserRepository userRepository, RatingRepository ratingRepository) {
+    public UserService(CommunityMapper communityMapper, RatingMapper ratingMapper, UserMapper userMapper, CommunityRepository communityRepository, UserRepository userRepository, RatingRepository ratingRepository, JwtUserDetailsService userDetailsService, JwtTokenUtil jwtTokenUtil) {
         this.communityMapper = communityMapper;
         this.ratingMapper = ratingMapper;
         this.userMapper = userMapper;
         this.communityRepository = communityRepository;
         this.userRepository = userRepository;
         this.ratingRepository = ratingRepository;
+        this.userDetailsService = userDetailsService;
+        this.jwtTokenUtil = jwtTokenUtil;
     }
 
     @Override
@@ -52,11 +61,37 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserDetailDto updateUser(String username, UserDetailDto userDetailDto) {
+    public ResponseEntity<UserDetailDto> updateUser(String username, UserDetailDto userDetailDto) {
         User user = getUserFromDb(username);
-        user = this.updateFields(user, userDetailDto);
+        HttpHeaders responseHeaders = new HttpHeaders();
+        if (userDetailDto.getUsername() != null) {
+            if (userRepository.findByUsername(userDetailDto.getUsername()).isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is taken.");
+            }
+            user.setUsername(userDetailDto.getUsername());
+        }
+        if (userDetailDto.getEmail() != null) {
+            if (userRepository.findByEmail(userDetailDto.getEmail()).isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is taken.");
+            }
+            user.setEmail(userDetailDto.getEmail());
+        }
+        if (userDetailDto.getStudyArea() != null) {
+            user.setStudyArea(userDetailDto.getStudyArea());
+        }
+        if (userDetailDto.getAvatar() != null) {
+            user.setAvatar(userDetailDto.getAvatar());
+        }
         user = userRepository.save(user);
-        return userMapper.toDetailedDto(user);
+        // has to be after save because userDetailsService makes query on db
+        if (userDetailDto.getUsername() != null) {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(userDetailDto.getUsername());
+            String token = jwtTokenUtil.generateToken(userDetails);
+            responseHeaders.set("token", token);
+        }
+        return ResponseEntity.ok()
+                .headers(responseHeaders)
+                .body(userMapper.toDetailedDto(user));
     }
 
     @Override
