@@ -109,9 +109,15 @@ public class UserService implements IUserService {
 
     private User updateFields(User user, UserDetailDto update) {
         if (update.getUsername() != null) {
+            if (userRepository.findByUsername(update.getUsername()).isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username is taken.");
+            }
             user.setUsername(update.getUsername());
         }
         if (update.getEmail() != null) {
+            if (userRepository.findByEmail(update.getEmail()).isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is taken.");
+            }
             user.setEmail(update.getEmail());
         }
         if (update.getStudyArea() != null) {
