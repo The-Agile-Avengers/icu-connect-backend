@@ -10,6 +10,7 @@ import com.agileavengers.icuconnectbackend.model.Rating;
 import com.agileavengers.icuconnectbackend.model.User;
 import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
 import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
+import com.agileavengers.icuconnectbackend.model.dto.UserDetailDto;
 import com.agileavengers.icuconnectbackend.repository.CommunityRepository;
 import com.agileavengers.icuconnectbackend.repository.RatingRepository;
 import com.agileavengers.icuconnectbackend.repository.UserRepository;
@@ -33,8 +34,8 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.*;
 
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
 @SpringBootTest()
@@ -74,7 +75,7 @@ class UserServiceTest {
         userMapper.setMappingService(mappingService);
         RatingMapper ratingMapper = new RatingMapperImpl(userMapper);
         ratingMapper.setMappingService(mappingService);
-        this.userService = new UserService(communityMapper, ratingMapper, communityRepository, userRepository, ratingRepository);
+        this.userService = new UserService(communityMapper, ratingMapper, userMapper, communityRepository, userRepository, ratingRepository);
     }
 
     @Test
@@ -237,5 +238,65 @@ class UserServiceTest {
         }
 
 
+    }
+
+    @Test
+    void getUser() {
+        User user = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(null).build();
+        when(userRepository.findByUsername(user.getUsername())).thenAnswer(i -> Optional.of(user));
+
+        UserDetailDto result = userService.getUser(user.getUsername());
+
+        verify(userRepository, times(1)).findByUsername(argThat(
+                x -> true ));
+
+        Assertions.assertNotNull(result, "Returned user shoudld not be null");
+        Assertions.assertEquals(user.getUsername(), result.getUsername(), "Should be username of user that is logged in.");
+        Assertions.assertEquals(user.getEmail(), result.getEmail(), "Should be email of user that is logged in.");
+        Assertions.assertEquals(user.getStudyArea(), result.getStudyArea(), "Should be study area of user that is logged in.");
+
+
+
+    }
+
+    @Test
+    void updateUser() {
+        User user = User.builder().username("Test1").email("test@uzh.ch").password("anything").id(2L).subscriptionSet(null).build();
+        when(userRepository.findByUsername(user.getUsername())).thenAnswer(i -> Optional.of(user));
+        when(userRepository.save(Mockito.any(User.class)))
+                .thenAnswer(i -> i.getArguments()[0]);
+        UserDetailDto details = UserDetailDto.builder().username("New Username").build();
+
+        UserDetailDto result = userService.updateUser(user.getUsername(), details);
+
+        // first time to get user, second time to verify user does not already exist
+        verify(userRepository, times(2)).findByUsername(argThat(
+                x -> true ));
+
+        Assertions.assertNotNull(result, "Returned user shoudld not be null");
+        Assertions.assertEquals(details.getUsername(), result.getUsername(), "Should be new username.");
+        Assertions.assertEquals("test@uzh.ch", result.getEmail(), "Should still be old email.");
+        Assertions.assertNull(result.getStudyArea(), "Should still be old study area.");
+    }
+
+    @Test
+    void updateUser2() {
+        User user = User.builder().username("Test1").email("test@uzh.ch").studyArea("Old Study Area").password("anything").id(2L).subscriptionSet(null).build();
+        when(userRepository.findByUsername(user.getUsername())).thenAnswer(i -> Optional.of(user));
+        when(userRepository.save(Mockito.any(User.class)))
+                .thenAnswer(i -> i.getArguments()[0]);
+        UserDetailDto details = UserDetailDto.builder().username("New Username").email("Anything@uzh.ch").studyArea("Computer Science").avatar("10").build();
+
+        UserDetailDto result = userService.updateUser(user.getUsername(), details);
+
+        // first time to get user, second time to verify user does not already exist
+        verify(userRepository, times(2)).findByUsername(argThat(
+                x -> true ));
+
+        Assertions.assertNotNull(result, "Returned user should not be null");
+        Assertions.assertEquals(details.getUsername(), result.getUsername(), "Should be new username.");
+        Assertions.assertEquals(details.getEmail(), result.getEmail(), "Should be new email.");
+        Assertions.assertEquals(details.getStudyArea(), result.getStudyArea(), "Should be new study area.");
+        Assertions.assertEquals(details.getAvatar(), result.getAvatar(), "Should be new avatar.");
     }
 }

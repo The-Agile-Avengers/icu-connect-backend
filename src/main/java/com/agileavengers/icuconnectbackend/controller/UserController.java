@@ -2,6 +2,7 @@ package com.agileavengers.icuconnectbackend.controller;
 
 import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
 import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
+import com.agileavengers.icuconnectbackend.model.dto.UserDetailDto;
 import com.agileavengers.icuconnectbackend.service.IUserService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +18,21 @@ public class UserController {
 
     public UserController(IUserService userService) {
         this.userService = userService;
+    }
+
+
+    @GetMapping(value = "")
+    UserDetailDto getUser() {
+        UserDetails principal =
+                (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userService.getUser(principal.getUsername());
+    }
+
+    @PutMapping(value = "")
+    UserDetailDto updateUser(@RequestBody UserDetailDto userDetailDto) {
+        UserDetails principal =
+                (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userService.updateUser(principal.getUsername(), userDetailDto);
     }
 
     @PutMapping(value = "/communities/{moduleId}")
