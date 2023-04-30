@@ -1,5 +1,6 @@
 package com.agileavengers.icuconnectbackend.mapper;
 
+import com.agileavengers.icuconnectbackend.model.dto.UserDetailDto;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -25,6 +26,10 @@ public abstract class UserMapper {
     }
 
     public abstract UserDto toDto(User user);
+
+    public abstract UserDetailDto toDetailedDto(User user);
+
+    public abstract User fromDetailedDto(UserDetailDto user);
 
     @Mapping(target = "password", qualifiedByName = "encrypt")
     public abstract User fromDto(RegisterUserDto registerUserDto);

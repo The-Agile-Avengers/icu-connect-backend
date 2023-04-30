@@ -19,7 +19,7 @@ public class RatingDto {
     private Double content;
     private Double workload;
 
-    private UserDto creator;
+    private UserDto user;
     private Timestamp creation;
 
     private String text;

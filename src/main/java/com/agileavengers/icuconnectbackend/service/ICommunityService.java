@@ -20,6 +20,8 @@ public interface ICommunityService {
 
     Page<RatingDto> getCommunityRatings(String moduleId, int page, int size, Optional<Boolean> sortByMostLiked);
 
+    RatingDto thumbsUp(String moduleId, Long ratingId, String username);
+
     RatingDto createCommunityRating(String moduleId, RatingDto ratingDto, String username);
 
     RatingAverage getCommunityRatingAverage(String moduleId);
@@ -28,10 +30,9 @@ public interface ICommunityService {
     
     PostDto createPost(String moduleId, PostDto postDto, String username);
 
-    Page<PostDto> getCommunityPosts(String moduleId, int pageNumber, int size);
+    Page<PostDto> getCommunityPosts(String moduleId, int pageNumber, int size, Optional<Integer> year);
 
-    // TODO: Impl. Delete Post in another user story
-    // void deletePost(String moduleId, Long postId, String username);
+    void deletePost(String moduleId, Long postId, String username);
 
     CommentDto createComment(String moduleId, Long postId, CommentDto commentDto, String username);
 }

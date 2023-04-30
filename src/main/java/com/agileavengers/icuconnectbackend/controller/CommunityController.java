@@ -141,20 +141,26 @@ public class CommunityController {
 
     @GetMapping(value = "/{moduleId}/posts", params = { "page", "size" })
     public Page<PostDto> getCommunityPosts(@PathVariable("moduleId") String moduleId, @RequestParam("page") int page,
-            @RequestParam("size") int size) {
-        return communityService.getCommunityPosts(moduleId, page, size);
+            @RequestParam("size") int size, @RequestParam("year") Optional<Integer> year) {
+        return communityService.getCommunityPosts(moduleId, page, size, year);
     }
-    // TODO: Impl. Delete Post in another user story
-    // @DeleteMapping(value = "/{moduleId}/posts/{postId}")
-    // public void deletePost(@PathVariable String moduleId, @PathVariable Long postId) {
-    //     UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    //     communityService.deletePost(moduleId, postId, principal.getUsername());
-    // }
+
+    @DeleteMapping(value = "/{moduleId}/posts/{postId}")
+    public void deletePost(@PathVariable String moduleId, @PathVariable Long postId) {
+        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        communityService.deletePost(moduleId, postId, principal.getUsername());
+    }
 
     @PostMapping(value = "/{moduleId}/posts/{postId}/comments")
     public CommentDto createPostComment(@PathVariable String moduleId, @PathVariable Long postId,
         @Valid @RequestBody CommentDto commentDto) {
         UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return communityService.createComment(moduleId, postId, commentDto, principal.getUsername());
+    }
+
+    @PostMapping(value = "/{moduleId}/ratings/{ratingId}/thumbsUp")
+    public RatingDto thumbsUp(@PathVariable("moduleId") String moduleId, @PathVariable("ratingId") Long ratingId, @RequestBody RatingDto ratingDto) {
+        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return communityService.thumbsUp(moduleId, ratingId, principal.getUsername());
     }
 }

@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PostDto {
     private Long id;
-    private UserDto creator;
+    private UserDto user;
     private Timestamp creation;
 
     @NotBlank(message = "Title cannot be blank")

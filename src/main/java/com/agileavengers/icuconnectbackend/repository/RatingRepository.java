@@ -25,4 +25,6 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
     List<Rating> findAllByCommunity_ModuleId(String communityId);
 
     Optional<Rating> findByCommunity_ModuleIdAndCreator_Id(String communityId, Long userId);
+
+    Optional<Rating> findByIdAndCommunity_ModuleId(Long id, String moduleId);
 }

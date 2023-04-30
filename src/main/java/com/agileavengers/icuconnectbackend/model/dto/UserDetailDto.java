@@ -1,25 +1,22 @@
 package com.agileavengers.icuconnectbackend.model.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
-
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommentDto {
+public class UserDetailDto {
     private Long id;
 
-    private UserDto user;
+    private String username;
 
-    private Timestamp creation;
+    private String email;
 
-    @NotBlank(message = "Text field should not be null")
-    private String text;
+    private String studyArea;
+
+    private String avatar;
 }
