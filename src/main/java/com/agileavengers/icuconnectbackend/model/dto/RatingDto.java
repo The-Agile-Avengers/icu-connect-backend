@@ -25,4 +25,6 @@ public class RatingDto {
     private String text;
 
     private Integer thumbsUp;
+
+    private Boolean hasLiked;
 }

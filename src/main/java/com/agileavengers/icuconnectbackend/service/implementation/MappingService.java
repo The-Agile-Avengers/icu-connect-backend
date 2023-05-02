@@ -44,4 +44,15 @@ public class MappingService {
         }
         return user.getSubscriptionSet().contains(community);
     }
+
+    public Boolean getHasLiked(Rating rating) {
+        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findByUsername(principal.getUsername()).get();
+
+        if (!rating.getThumbsUp().contains(user)) {
+            return false;
+        } 
+
+        return true;
+    }
 }
