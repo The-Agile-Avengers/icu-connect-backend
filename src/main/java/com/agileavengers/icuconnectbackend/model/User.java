@@ -34,8 +34,5 @@ public class User {
     private StudyArea studyArea;
 
     private String avatar;
-    
-    // @ManyToMany 
-    // Set<File> uploadedFiles = new HashSet<>();
 
 }

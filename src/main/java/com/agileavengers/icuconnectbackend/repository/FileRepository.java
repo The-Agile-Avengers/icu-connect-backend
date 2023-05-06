@@ -11,23 +11,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.agileavengers.icuconnectbackend.model.File;
 
 public interface FileRepository extends JpaRepository<File, Long> {
-    // /**
-    // * Get list of Posts that refer to a specific Community
-    // *
-    // * @param communityId Id of the relevant community
-    // * @return List of all referenced posts
-    // */
+
     Page<File> findAllByCommunity_ModuleId(String moduleId, Pageable pageable);
 
     Optional<File> findByIdAndCommunity_ModuleId(Long id, String moduleId);
-
-    // Boolean existsByCommunity_ModuleIdAndId(String moduleId, Long id);
-
-    // @Transactional()
-    // void deleteFileMetadataById(Long id);
-
-    // @Transactional()
-    // void deleteFileMetadataByIdAndCreator_Id(Long id, Long creatorId);
 
     Optional<File> findByFileName(String fileName);
 

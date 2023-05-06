@@ -40,8 +40,7 @@ public class FileController {
             @RequestParam("file") MultipartFile file) {
         UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        FileDto fileDto = fileService.uploadFile(file, principal.getUsername(), moduleId);
-        return fileDto;
+        return fileService.uploadFile(file, principal.getUsername(), moduleId);
     }
 
     @GetMapping(value = "{moduleId}/files/{id}/download")
