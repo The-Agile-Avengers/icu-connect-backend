@@ -19,3 +19,18 @@
 
 ### OpenAPI
 To access the openAPI resource visit: `localhost:8080/swagger-ui/index.html`
+
+### Localstack
+#### S3 File System
+1. Set your `LOCALSTACK_API_KEY` in `docker-compose-localstack-pro`
+1. Execute `docker-compose -f docker-compose-localstack-pro up`
+2. SSH into container or open Docker Desktop and open the terminal of the container
+3. In the container terminal, execute  `aws configure`
+4. Set `AWS Access Key ID` to whatever you like (and remember the value)
+5. Set `AWS Secret Access Key` to whatever you like (and remember the value)
+6. Set `Default region name` to `eu-west-1`
+7. Set `Default output format` to `json`
+8. Execute `aws --endpoint-url=http://localhost:4566 s3 mb s3://icu.connect`
+9. In the application.properties file of the project set `config.aws.s3.access-key`
+`config.aws.s3.secret-key` and `config.aws.region` to the values you chose before
+10. Run the Application

@@ -29,6 +29,7 @@ public class FileUploadConfig {
         return AmazonS3ClientBuilder.standard()
                 .withCredentials(getCredentialsProvider())
                 .withEndpointConfiguration(getEndpointConfiguration(s3EndpointUrl))
+                .enablePathStyleAccess()
                 .build();
     }
 

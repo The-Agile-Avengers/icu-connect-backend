@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
@@ -49,5 +50,10 @@ public class FileStore {
         } catch (AmazonServiceException | IOException e) {
             throw new IllegalStateException("Failed to download file", e);
         }
+    }
+    
+    public void deleteFile(final String fileName) {
+        final DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(bucketName, fileName);
+        awsS3Client.deleteObject(deleteObjectRequest);
     }
 }

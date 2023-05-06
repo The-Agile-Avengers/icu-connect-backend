@@ -12,7 +12,7 @@ public interface IFileService {
 
     public byte[] downloadFile(Long id, String moduleId);
 
-    public void deleteFile(String fileName);
+    public void deleteFile(Long id, String moduleId, String username);
 
     Page<FileDto> getCommunityFiles(String moduleId, int pageNumber, int size, Optional<Integer> year);
 

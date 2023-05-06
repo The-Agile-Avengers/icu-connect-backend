@@ -94,14 +94,38 @@ public class FileService implements IFileService {
 
     @Override
     public byte[] downloadFile(Long id, String moduleId) {
-        File file = fileRepository.findByIdAndCommunity_ModuleId(id, moduleId).get();
-        return fileStore.download(file.getFileName());
+        Optional<File> file = fileRepository.findByIdAndCommunity_ModuleId(id, moduleId);
+
+        if (file.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File does not exist");
+        }
+
+        return fileStore.download(file.get().getFileName());
     }
 
     @Override
-    public void deleteFile(String fileName) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deleteFile'");
+    public void deleteFile(Long id, String moduleId, String username) {
+        Optional<File> fileToDelete = fileRepository.findByIdAndCommunity_ModuleId(id, moduleId);
+
+        if (fileToDelete.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "file does not exist");
+        }
+
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "user does not exist");
+        }
+
+        Optional<Community> community = communityRepository.findCommunityByModuleId(moduleId);
+        if (community.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community does not exist");
+        }
+
+
+        if (user.get().equals(fileToDelete.get().getCreator())) {
+            fileStore.deleteFile(fileToDelete.get().getFileName());
+            fileRepository.delete(fileToDelete.get());
+        }
     }
 
     @Override
@@ -129,13 +153,13 @@ public class FileService implements IFileService {
         return filePage.map(fileMapper::toDto);
     }
 
+    
     private String rename(String fileName, String moduleId, int counter) {
         final String targetFileName = fileName;
         List<File> files = fileRepository.findAllByCommunity_ModuleId(moduleId);
+        Optional<File> targetFile = files.stream().filter(f -> f.getFileName().equals(targetFileName)).findFirst();
 
-        Optional<File> targetFile = files.stream().filter(f -> f.getFileName() == targetFileName).findFirst();
-
-        if (!targetFile.isEmpty()) {
+        if (targetFile.isPresent()) {
             counter++;
 
             fileName = fileName + "-" + counter;
