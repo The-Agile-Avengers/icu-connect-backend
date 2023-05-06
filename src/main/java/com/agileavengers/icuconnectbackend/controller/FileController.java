@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.agileavengers.icuconnectbackend.model.File;
+import com.agileavengers.icuconnectbackend.model.dto.FileDto;
 import com.agileavengers.icuconnectbackend.service.IFileService;
 
 @RestController
@@ -29,18 +30,18 @@ public class FileController {
     }
 
     @GetMapping(value = "{moduleId}/files", params = { "page", "size" })
-    public Page<File> getCommunityFiles(@PathVariable("moduleId") String moduleId, @RequestParam("page") int pageNumber,
+    public Page<FileDto> getCommunityFiles(@PathVariable("moduleId") String moduleId, @RequestParam("page") int pageNumber,
             @RequestParam("size") int size, @RequestParam("year") Optional<Integer> year) {
         return fileService.getCommunityFiles(moduleId, pageNumber, size, year);
     }
 
-    @PostMapping(value = "{moduleId}/files")
-    public ResponseEntity<String> uploadFile(@PathVariable("moduleId") String moduleId,
+    @PostMapping(value = "{moduleId}/files", consumes = "multipart/form-data")
+    public FileDto uploadFile(@PathVariable("moduleId") String moduleId,
             @RequestParam("file") MultipartFile file) {
         UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        fileService.uploadFile(file, principal.getUsername(), moduleId);
-        return ResponseEntity.ok("File uploaded");
+        FileDto fileDto = fileService.uploadFile(file, principal.getUsername(), moduleId);
+        return fileDto;
     }
 
     @GetMapping(value = "{moduleId}/files/{id}/download")

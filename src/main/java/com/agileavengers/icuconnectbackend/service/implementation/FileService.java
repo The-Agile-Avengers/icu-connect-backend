@@ -15,10 +15,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.agileavengers.icuconnectbackend.mapper.FileMapper;
 import com.agileavengers.icuconnectbackend.mapper.UserMapper;
 import com.agileavengers.icuconnectbackend.model.Community;
 import com.agileavengers.icuconnectbackend.model.File;
 import com.agileavengers.icuconnectbackend.model.User;
+import com.agileavengers.icuconnectbackend.model.dto.FileDto;
 import com.agileavengers.icuconnectbackend.repository.CommentRepository;
 import com.agileavengers.icuconnectbackend.repository.CommunityRepository;
 import com.agileavengers.icuconnectbackend.repository.FileRepository;
@@ -41,10 +43,10 @@ public class FileService implements IFileService {
     RatingRepository ratingRepository;
     UserRepository userRepository;
     CommentRepository commentRepository;
-    private final UserMapper userMapper;
+    private final FileMapper fileMapper;
 
     @Override
-    public String uploadFile(MultipartFile multipartFile, String username, String moduleId) {
+    public FileDto uploadFile(MultipartFile multipartFile, String username, String moduleId) {
         if (multipartFile.isEmpty()) {
             throw new IllegalStateException("Cannot find file");
         }
@@ -87,7 +89,7 @@ public class FileService implements IFileService {
 
         community.get().getUploadedFiles().add(file);
 
-        return file.getFileName();
+        return fileMapper.toDto(file);
     }
 
     @Override
@@ -103,7 +105,7 @@ public class FileService implements IFileService {
     }
 
     @Override
-    public Page<File> getCommunityFiles(String moduleId, int pageNumber, int size, Optional<Integer> year) {
+    public Page<FileDto> getCommunityFiles(String moduleId, int pageNumber, int size, Optional<Integer> year) {
 
         Pageable page = PageRequest.of(pageNumber, size);
         Optional<Community> community = communityRepository.findCommunityByModuleId(moduleId);
@@ -120,7 +122,11 @@ public class FileService implements IFileService {
             filePage = fileRepository.findAllByCommunity_ModuleId(moduleId, page);
         }
 
-        return filePage;
+        for (File f: filePage.getContent()) {
+            f.setFilePath("/comminities/"+community.get().getModuleId()+"/file/"+f.getId()+"/download");
+        }
+
+        return filePage.map(fileMapper::toDto);
     }
 
     private String rename(String fileName, String moduleId, int counter) {

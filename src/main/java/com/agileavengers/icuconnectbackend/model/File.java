@@ -2,6 +2,8 @@ package com.agileavengers.icuconnectbackend.model;
 
 import java.sql.Timestamp;
 
+import com.agileavengers.icuconnectbackend.model.dto.UserDto;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
