@@ -30,6 +30,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -179,7 +180,7 @@ class UserServiceTest {
 
         when(userRepository.findByUsername(user.getUsername())).thenAnswer(i -> Optional.of(user));
 
-        Rating rating = Rating.builder().community(community).creator(user).content(4.0).workload(1.0).teaching(3.0).text("Rating text").build();
+        Rating rating = Rating.builder().community(community).creator(user).content(4.0).workload(1.0).teaching(3.0).text("Rating text").thumbsUp(Collections.<User>emptySet()).build();
 
         when(ratingRepository.findByCommunity_ModuleIdAndCreator_Id(community.getModuleId(), user.getId())).thenReturn(Optional.of(rating));
 
