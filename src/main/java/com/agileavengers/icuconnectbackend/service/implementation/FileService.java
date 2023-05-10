@@ -76,7 +76,7 @@ public class FileService implements IFileService {
         }
 
         // recursive function to change name if already exists
-        fileName = rename(fileName, community.get().getModuleId(), 0);
+        fileName = rename(fileName, community.get().getModuleId());
 
         File file = File.builder()
                 .community(community.get())
@@ -121,11 +121,12 @@ public class FileService implements IFileService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community does not exist");
         }
 
-
-        if (user.get().equals(fileToDelete.get().getCreator())) {
-            fileStore.deleteFile(fileToDelete.get().getFileName());
-            fileRepository.delete(fileToDelete.get());
+        if (!user.get().equals(fileToDelete.get().getCreator())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "user is not allowed to delete file");
         }
+
+        fileStore.deleteFile(fileToDelete.get().getFileName());
+        fileRepository.delete(fileToDelete.get());
     }
 
     @Override
@@ -154,18 +155,27 @@ public class FileService implements IFileService {
     }
 
     
-    private String rename(String fileName, String moduleId, int counter) {
-        final String targetFileName = fileName;
-        List<File> files = fileRepository.findAllByCommunity_ModuleId(moduleId);
-        Optional<File> targetFile = files.stream().filter(f -> f.getFileName().equals(targetFileName)).findFirst();
+    private String rename(String fileName, String moduleId) {
+        int count = 0;
+        Optional<File> targetFile = fileRepository.findByFileNameAndCommunity_ModuleId(fileName, moduleId);
 
-        if (targetFile.isPresent()) {
-            counter++;
-
-            fileName = fileName + "-" + counter;
-            rename(fileName, moduleId, counter);
+        while (targetFile.isPresent()) {
+            int extensionIndex = fileName.lastIndexOf(".");
+            int parenthesisIndex = fileName.lastIndexOf("(");
+            String extension = "";
+            
+            if (extensionIndex != -1) {
+                extension = fileName.substring(extensionIndex);
+                fileName = fileName.substring(0, extensionIndex);
+            }
+            
+            if (parenthesisIndex != -1) {
+                fileName = fileName.substring(0, parenthesisIndex);
+            }
+            fileName = fileName + "(" + count + ")" + extension;
+            count++;
+            targetFile = fileRepository.findByFileNameAndCommunity_ModuleId(fileName, moduleId);
         }
-
         return fileName;
     }
 }

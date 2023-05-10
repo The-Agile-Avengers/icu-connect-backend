@@ -22,4 +22,6 @@ public class FileDto {
     private String filePath;
 
     private String fileName;
+
+    private boolean hasUploaded;
 }

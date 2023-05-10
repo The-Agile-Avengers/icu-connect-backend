@@ -1,6 +1,7 @@
 package com.agileavengers.icuconnectbackend.service.implementation;
 
 import com.agileavengers.icuconnectbackend.model.Community;
+import com.agileavengers.icuconnectbackend.model.File;
 import com.agileavengers.icuconnectbackend.model.Rating;
 import com.agileavengers.icuconnectbackend.model.User;
 import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
@@ -50,6 +51,17 @@ public class MappingService {
         User user = userRepository.findByUsername(principal.getUsername()).get();
 
         if (!rating.getThumbsUp().contains(user)) {
+            return false;
+        } 
+
+        return true;
+    }
+
+    public Boolean getHasUploaded(File file) {
+        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findByUsername(principal.getUsername()).get();
+
+        if (!file.getCreator().equals(user)) {
             return false;
         } 
 

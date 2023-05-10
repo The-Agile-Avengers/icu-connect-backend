@@ -18,6 +18,8 @@ public interface FileRepository extends JpaRepository<File, Long> {
 
     Optional<File> findByFileName(String fileName);
 
+    Optional<File> findByFileNameAndCommunity_ModuleId(String fileName, String moduleId);
+
     List<File> findAllByCommunity_ModuleId(String moduleId);
 
     Page<File> findAllByCreationBetween(Timestamp begin, Timestamp end, Pageable pageable);

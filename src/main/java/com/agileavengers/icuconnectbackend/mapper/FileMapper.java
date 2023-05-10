@@ -25,6 +25,7 @@ public abstract class FileMapper {
     }
 
     @Mapping(target = "user", source = "creator")
+    @Mapping(target = "hasUploaded", expression = "java(mappingService.getHasUploaded(file))")
     public abstract FileDto toDto(File file);
 
     @Mapping(target = "creator", source = "user")
