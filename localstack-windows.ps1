@@ -1,5 +1,3 @@
-
-
 Write-Host "Listening for localstack startup"
 Write-Host "." -NoNewline
 while ((Test-NetConnection -ComputerName localhost -Port 4566 -InformationLevel Quiet) -ne $true)
@@ -11,9 +9,9 @@ Write-Host "Connected to localstack (localhost:4566)" -ForegroundColor Green
 
 Write-Host "Setup Localstack Env"
 
-awslocal s3api create-bucket --bucket icufrontend --create-bucket-configuration LocationConstraint=eu-west-1
-Write-Host "# setup frontend S3 bucket"
-Write-Host "S3 bucket icufrontend created" -ForegroundColor Green
+awslocal s3api create-bucket --bucket icufiles --create-bucket-configuration LocationConstraint=eu-west-1
+Write-Host "# setup file store S3 bucket"
+Write-Host "S3 bucket icufiles created" -ForegroundColor Green
 
 awslocal rds create-db-cluster --db-cluster-identifier dbcluster1 --engine mysql --database-name icudb1
 Write-Host "# setup RDS MySql database"
