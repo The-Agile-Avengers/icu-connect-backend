@@ -2,7 +2,6 @@ package com.agileavengers.icuconnectbackend.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,6 +25,10 @@ import jakarta.validation.Valid;
 
 import java.util.Optional;
 
+/**
+ * Controller to handle all functionality related to communities, including all entities that are directly related to a community, such as ratings and posts.
+ */
+
 @RestController
 @RequestMapping("/communities")
 public class CommunityController {
@@ -35,16 +38,6 @@ public class CommunityController {
     @Autowired
     CommunityController(ICommunityService communityService) {
         this.communityService = communityService;
-    }
-
-    /**
-     * Generates example data objects. Will be removed for production
-     *
-     * @return Community Object
-     */
-    @PostMapping(value = "/setup")
-    public CommunityDto setupExampleCommunity() {
-        return communityService.setupExampleCommunity();
     }
 
     /**
@@ -82,19 +75,6 @@ public class CommunityController {
         return communityService.getCommunity(moduleId);
     }
 
-//    /**
-//     * Get all reviews linked to a community
-//     * @param id id of the community
-//     * @param page page index
-//     * @param size number of reviews per page
-//     * @return Page of reviews
-//     */
-//    @GetMapping(value = "/{id}/reviews", params = { "page", "size" })
-//    public Page<ReviewDto> getCommunityReviews(@PathVariable("id") Long id, @RequestParam("page") int page,
-//                                               @RequestParam("size") int size) {
-//        return communityService.getCommunityReviews(id, page, size);
-//    }
-
     /**
      * Get all ratings linked to a community
      *
@@ -109,11 +89,24 @@ public class CommunityController {
         return communityService.getCommunityRatings(moduleId, page, size, sortByMostLiked);
     }
 
+    /**
+     * Calculates the rating average of a specific community.
+     *
+     * @param moduleId Id of community
+     * @return Calculated average rating
+     */
     @GetMapping(value = "/{moduleId}/ratings/average")
     public RatingAverage getCommunityRatingAverage(@PathVariable("moduleId") String moduleId) {
         return communityService.getCommunityRatingAverage(moduleId);
     }
 
+    /**
+     * Creates a new rating object related to a community. Each user is only allowed to rate a community once. If it is already rated it will cause a BAD_REQEST.
+     *
+     * @param moduleId ID of rated community
+     * @param ratingDto object with information about rating
+     * @return saved rating
+     */
     @PostMapping(value = "/{moduleId}/ratings")
     public RatingDto rateCommunity(@PathVariable("moduleId") String moduleId, @RequestBody RatingDto ratingDto) {
         // TODO: provide actual username
@@ -123,15 +116,11 @@ public class CommunityController {
     }
 
     /**
-     * Delete a community.
-     *
-     * @param moduleId of the community to be deleted
+     * Create a new post related to a community.
+     * @param moduleId Id of the community to create a new post about
+     * @param postDto details about the post
+     * @return persisted post object
      */
-    @DeleteMapping(value = "/{moduleId}")
-    public void deleteCommunity(@PathVariable("moduleId") String moduleId) {
-        //TODO: only allowed with specific rights. might be removed for production
-        communityService.deleteCommunity(moduleId);
-    }
 
     @PostMapping(value = "/{moduleId}/posts")
     public PostDto createPost(@PathVariable("moduleId") String moduleId, @Valid @RequestBody PostDto postDto) {
@@ -139,18 +128,43 @@ public class CommunityController {
         return communityService.createPost(moduleId, postDto, principal.getUsername());
     }
 
+    /**
+     * Gets paged posts of a community.
+     *
+     * @param moduleId id of the community
+     * @param page which page to return
+     * @param size how many elements per page
+     * @param year if given, filters the posts to only be from that year
+     * @return page of posts
+     */
+
     @GetMapping(value = "/{moduleId}/posts", params = { "page", "size" })
     public Page<PostDto> getCommunityPosts(@PathVariable("moduleId") String moduleId, @RequestParam("page") int page,
             @RequestParam("size") int size, @RequestParam("year") Optional<Integer> year) {
         return communityService.getCommunityPosts(moduleId, page, size, year);
     }
 
+    /**
+     * Allows the creator of a post to delete the post.
+     *
+     * @param moduleId Community that the post relates to
+     * @param postId id of the post to be deleted
+     */
     @DeleteMapping(value = "/{moduleId}/posts/{postId}")
     public void deletePost(@PathVariable String moduleId, @PathVariable Long postId) {
         UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         communityService.deletePost(moduleId, postId, principal.getUsername());
     }
 
+    /**
+     * Endpoint to add a comment to a post.
+     * Will throw BAD_REQUEST if the community or the post does not exist.
+     *
+     * @param moduleId id the community
+     * @param postId post related to the community
+     * @param commentDto object containing information about the comment
+     * @return created comment object
+     */
     @PostMapping(value = "/{moduleId}/posts/{postId}/comments")
     public CommentDto createPostComment(@PathVariable String moduleId, @PathVariable Long postId,
         @Valid @RequestBody CommentDto commentDto) {
@@ -158,8 +172,16 @@ public class CommunityController {
         return communityService.createComment(moduleId, postId, commentDto, principal.getUsername());
     }
 
+    /**
+     * Endpoint to like a rating related to a community. If already liked it will unlike the rating.
+     * Will return BAD_REQUEST if community or rating does not exist.
+     *
+     * @param moduleId Community that belongs to rating
+     * @param ratingId Rating that will be liked or unliked
+     * @return Rating object with current thumbsUp property
+     */
     @PostMapping(value = "/{moduleId}/ratings/{ratingId}/thumbsUp")
-    public RatingDto thumbsUp(@PathVariable("moduleId") String moduleId, @PathVariable("ratingId") Long ratingId, @RequestBody RatingDto ratingDto) {
+    public RatingDto thumbsUp(@PathVariable("moduleId") String moduleId, @PathVariable("ratingId") Long ratingId) {
         UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return communityService.thumbsUp(moduleId, ratingId, principal.getUsername());
     }

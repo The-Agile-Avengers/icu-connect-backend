@@ -9,6 +9,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * Controller for instructors.
+ * Functionality will be extended, once instructors contain more information.
+ */
+
 @RestController
 @RequestMapping("/instructors")
 public class InstructorController {
@@ -20,6 +25,10 @@ public class InstructorController {
         this.instructorService = instructorService;
     }
 
+    /**
+     * Queries all currently existing instructors
+     * @return List of instructors.
+     */
     @GetMapping(value = "")
     List<InstructorDto> getAllInstructors() {
         return instructorService.getAllInstructors();
