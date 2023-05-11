@@ -1,19 +1,15 @@
 package com.agileavengers.icuconnectbackend.service.implementation;
 
-import com.agileavengers.icuconnectbackend.mapper.CommunityMapper;
-import com.agileavengers.icuconnectbackend.mapper.RatingMapper;
-import com.agileavengers.icuconnectbackend.mapper.RatingMapperImpl;
-import com.agileavengers.icuconnectbackend.mapper.UserMapper;
-import com.agileavengers.icuconnectbackend.model.Community;
-import com.agileavengers.icuconnectbackend.model.Instructor;
-import com.agileavengers.icuconnectbackend.model.Rating;
-import com.agileavengers.icuconnectbackend.model.User;
+import com.agileavengers.icuconnectbackend.mapper.*;
+import com.agileavengers.icuconnectbackend.model.*;
 import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
 import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
 import com.agileavengers.icuconnectbackend.model.dto.UserDetailDto;
 import com.agileavengers.icuconnectbackend.repository.CommunityRepository;
 import com.agileavengers.icuconnectbackend.repository.RatingRepository;
+import com.agileavengers.icuconnectbackend.repository.StudyAreaRepository;
 import com.agileavengers.icuconnectbackend.repository.UserRepository;
+import com.agileavengers.icuconnectbackend.service.IStudyAreaService;
 import com.agileavengers.icuconnectbackend.service.IUserService;
 import org.junit.gen5.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,11 +25,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
@@ -50,6 +42,8 @@ class UserServiceTest {
     RatingRepository ratingRepository;
     @Mock
     UserRepository userRepository;
+    @Mock
+    StudyAreaRepository studyAreaRepository;
 
     void setupSecurity(User user) {
         when(userRepository.findByUsername(user.getUsername())).thenAnswer(i -> Optional.of(user));
@@ -69,14 +63,17 @@ class UserServiceTest {
         communityRepository = mock(CommunityRepository.class);
         userRepository = mock(UserRepository.class);
         ratingRepository = mock(RatingRepository.class);
+        studyAreaRepository = mock(StudyAreaRepository.class);
         MappingService mappingService = new MappingService(userRepository, ratingRepository);
         CommunityMapper communityMapper = Mappers.getMapper(CommunityMapper.class);
         communityMapper.setMappingService(mappingService);
         UserMapper userMapper = Mappers.getMapper(UserMapper.class);
+        StudyAreaMapper studyAreaMapper = Mappers.getMapper(StudyAreaMapper.class);
         userMapper.setMappingService(mappingService);
         RatingMapper ratingMapper = new RatingMapperImpl(userMapper);
         ratingMapper.setMappingService(mappingService);
-        this.userService = new UserService(communityMapper, ratingMapper, userMapper, communityRepository, userRepository, ratingRepository);
+        IStudyAreaService studyAreaService = new StudyAreaService(studyAreaMapper, studyAreaRepository);
+        this.userService = new UserService(communityMapper, ratingMapper, userMapper, communityRepository, userRepository, ratingRepository, studyAreaService);
     }
 
     @Test
@@ -282,11 +279,13 @@ class UserServiceTest {
 
     @Test
     void updateUser2() {
-        User user = User.builder().username("Test1").email("test@uzh.ch").studyArea("Old Study Area").password("anything").id(2L).subscriptionSet(null).build();
+        User user = User.builder().username("Test1").email("test@uzh.ch").studyArea(StudyArea.builder().name("Old Study Area").build()).password("anything").id(2L).subscriptionSet(null).build();
         when(userRepository.findByUsername(user.getUsername())).thenAnswer(i -> Optional.of(user));
         when(userRepository.save(Mockito.any(User.class)))
                 .thenAnswer(i -> i.getArguments()[0]);
-        UserDetailDto details = UserDetailDto.builder().username("New Username").email("Anything@uzh.ch").studyArea("Computer Science").avatar("10").build();
+        when(studyAreaRepository.save(Mockito.any(StudyArea.class)))
+                .thenAnswer(i -> i.getArguments()[0]);
+        UserDetailDto details = UserDetailDto.builder().username("New Username").email("Anything@uzh.ch").studyArea(StudyArea.builder().name("Computer Science").build()).avatar("10").build();
 
         UserDetailDto result = userService.updateUser(user.getUsername(), details);
 
