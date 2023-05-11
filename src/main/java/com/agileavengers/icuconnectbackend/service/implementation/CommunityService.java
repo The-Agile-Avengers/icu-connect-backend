@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -182,6 +183,7 @@ public class CommunityService implements ICommunityService {
         rating.setCommunity(community.get());
         rating.setCreator(user.get());
         rating.setCreation(new Timestamp(System.currentTimeMillis()));
+        rating.setThumbsUp(Collections.<User>emptySet());
 
         return ratingMapper.toDto(ratingRepository.save(rating));
     }

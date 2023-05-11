@@ -15,6 +15,8 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.*;
 import org.springframework.security.core.Authentication;
@@ -32,6 +34,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
 @SpringBootTest()
+@MockitoSettings(strictness = Strictness.LENIENT)
 class ICommunityServiceTest {
 
     ICommunityService communityService;
@@ -288,19 +291,23 @@ class ICommunityServiceTest {
         User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
 
         User user2 = User.builder().username("Test2").password("anything").id(3L).build();
-
-        Rating rating = Rating.builder().creator(user1).community(community).content(4.0).workload(3.0).teaching(1.0).build();
-        Rating rating2 = Rating.builder().creator(user2).community(community).content(5.0).workload(2.0).teaching(4.0).build();
+        
+        setupSecurity(user1);
+        setupSecurity(user2);
+        
+        Rating rating = Rating.builder().creator(user1).community(community).content(4.0).workload(3.0).teaching(1.0).thumbsUp(Collections.<User>emptySet()).build();
+        Rating rating2 = Rating.builder().creator(user2).community(community).content(5.0).workload(2.0).teaching(4.0).thumbsUp(Collections.<User>emptySet()).build();
         List<Rating> ratingList = List.of(rating, rating2);
 
         Pageable pageable = PageRequest.of(0, 1, Sort.by("thumbsUp").descending());
-
+        
         when(ratingRepository.findAllByCommunity_ModuleId(community.getModuleId(), pageable))
                 .thenAnswer(i -> {
                     Pageable argument = (Pageable) i.getArguments()[1];
                     return new PageImpl<>(ratingList.subList(argument.getPageNumber(), argument.getPageSize()), argument, ratingList.size());
                 });
 
+   
         Page<RatingDto> result = communityService.getCommunityRatings(community.getModuleId(), pageable.getPageNumber(), pageable.getPageSize(), Optional.of(Boolean.TRUE));
 
         Assertions.assertNotNull(result, "Page should not be null");
@@ -346,9 +353,11 @@ class ICommunityServiceTest {
                 argument.setId(11L);
                 return argument;
             });
-
-        RatingDto rating = RatingDto.builder().workload(3.0).content(1.0).teaching(5.0).text("Average course").build();
-
+        Authentication authentication = mock(Authentication.class);
+        // Mockito.whens() for your authorization object
+        setupSecurity(user1);
+        RatingDto rating = RatingDto.builder().workload(3.0).content(1.0).teaching(5.0).text("Average course").hasLiked(false).build();
+        
         RatingDto result = communityService.createCommunityRating(community.getModuleId(), rating, user1.getUsername());
 
         Assertions.assertNotNull(result, "Returned object should not be null");
@@ -704,6 +713,7 @@ class ICommunityServiceTest {
 
         User user1 = User.builder().username("Test1").password("anything").id(2L).subscriptionSet(Set.of(community)).build();
 
+        setupSecurity(user1);
         Rating rating = Rating.builder().creator(user1).community(community).content(5.0).workload(3.0).teaching(2.0).thumbsUp(new HashSet<User>()).build();
 
         when(userRepository.findByUsername(user1.getUsername())).thenAnswer(i -> Optional.of(user1));
@@ -717,9 +727,13 @@ class ICommunityServiceTest {
         RatingDto result = communityService.thumbsUp(community.getModuleId(), rating.getId(), user1.getUsername());
 
         Assertions.assertSame(1, result.getThumbsUp(), "Result should have one thumbs up");
+        Assertions.assertTrue(result.getHasLiked());
+
 
         result = communityService.thumbsUp(community.getModuleId(), rating.getId(), user1.getUsername());
 
         Assertions.assertSame(0, result.getThumbsUp(), "Result should have zero thumbs up");
+        Assertions.assertFalse(result.getHasLiked());
+
     }
 }
