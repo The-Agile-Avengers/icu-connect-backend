@@ -54,24 +54,13 @@ public class CommunityService implements ICommunityService {
         this.commentRepository = commentRepository;
     }
 
-    @Override
-    public CommunityDto setupExampleCommunity() {
-        Instructor instructor = Instructor.builder().name("Anna King").build();
-        instructor = instructorRepository.save(instructor);
-
-        Community community = Community.builder().name("Lecture 1").moduleId("UZH123").instructor(instructor).build();
-        community = communityRepository.save(community);
-
-        User user = User.builder().username("Test").password("password").build();
-        userRepository.save(user);
-
-        createCommunityRating(community.getModuleId(),
-                RatingDto.builder().teaching(3.0).content(2.5).workload(5.0).build(),
-                user.getUsername());
-
-        return communityMapper.toDto(community);
-    }
-
+    /**
+     * Create a new community based on received dto.
+     * Creates a new instructor object if instructor with given name cannot be found.
+     *
+     * @param communityDto Community to be created
+     * @return Created community
+     */
     @Override
     public CommunityDto createCommunity(CommunityDto communityDto) {
         Community community = new Community();
@@ -97,6 +86,14 @@ public class CommunityService implements ICommunityService {
         return communityMapper.toDto(communityRepository.save(community));
     }
 
+    /**
+     * Get a page of communities.
+     * If search is given, it will filter for communities that contain the term in either moduleId, instructor or name.
+     * @param page page index
+     * @param size number of communities per page
+     * @param search term to filter for
+     * @return page of communites
+     */
     @Override
     public Page<CommunityDto> getCommunities(int page, int size, Optional<String> search) {
         Pageable pageable = PageRequest.of(page, size);
@@ -111,6 +108,11 @@ public class CommunityService implements ICommunityService {
         return communityPage.map(communityMapper::toDto);
     }
 
+    /**
+     * Get a community by an id. Throws an exception if no community with moduleId exists.
+     * @param moduleId id of the community
+     * @return community with moduleId
+     */
     @Override
     public CommunityDto getCommunity(String moduleId) {
         Optional<Community> communityOptional = this.communityRepository.findCommunityByModuleId(moduleId);
@@ -120,6 +122,15 @@ public class CommunityService implements ICommunityService {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "entity not found");
     }
 
+    /**
+     * Get page of ratings related to a community. If sortByMostLiked is true or not given, it will be sorted by the highest count of likes. Otherwise it will be sorted by most recent.
+     *
+     * @param moduleId id of community
+     * @param page page index
+     * @param size number of ratings per page
+     * @param sortByMostLiked bool to change sorting
+     * @return page of ratings
+     */
     @Override
     public Page<RatingDto> getCommunityRatings(String moduleId, int page, int size, Optional<Boolean> sortByMostLiked) {
         Sort sort = Sort.by("thumbsUp").descending();
@@ -135,6 +146,13 @@ public class CommunityService implements ICommunityService {
         return ratingPage.map(ratingMapper::toDto);
     }
 
+    /**
+     * Method to like or unlike a rating. If the logged in user has already liked the rating, it will be unliked.
+     * @param moduleId id of the community
+     * @param ratingId id of the rating that will be liked or unliked
+     * @param username username of logged in user
+     * @return updated rating object.
+     */
     @Override
     public RatingDto thumbsUp(String moduleId, Long ratingId, String username) {
         Optional<User> userOptional = userRepository.findByUsername(username);
@@ -153,6 +171,13 @@ public class CommunityService implements ICommunityService {
         return ratingMapper.toDto(ratingRepository.save(rating.modifyThumbsUp(user)));
     }
 
+    /**
+     * Create a new rating for a community. If the user has already rated, an exception will be thrown.
+     * @param moduleId id of the community to rate
+     * @param ratingDto information about the rating
+     * @param username logged in username
+     * @return created rating
+     */
     @Override
     public RatingDto createCommunityRating(String moduleId, RatingDto ratingDto, String username) {
         Optional<User> user = userRepository.findByUsername(username);
@@ -188,12 +213,21 @@ public class CommunityService implements ICommunityService {
         return ratingMapper.toDto(ratingRepository.save(rating));
     }
 
+    /**
+     * Method to calculate the average rating of a community
+     * @param moduleId id of the community
+     * @return obejct containing calculated average
+     */
     @Override
     public RatingAverage getCommunityRatingAverage(String moduleId) {
         List<Rating> ratingList = ratingRepository.findAllByCommunity_ModuleId(moduleId);
         return new RatingAverage(ratingList);
     }
 
+    /**
+     * Deletes a community. Currently no restrictions, thus no endpoint provided
+     * @param moduleId id of the community
+     */
     @Override
     public void deleteCommunity(String moduleId) {
         // TODO: make sure requesting user has rights to do so
@@ -205,6 +239,13 @@ public class CommunityService implements ICommunityService {
         }
     }
 
+    /**
+     * Create a new post related to a community
+     * @param moduleId id of the community
+     * @param postDto object containing information about the post
+     * @param username of user creating the post
+     * @return created post
+     */
     @Override
     public PostDto createPost(String moduleId, PostDto postDto, String username) {
         Optional<User> user = userRepository.findByUsername(username);
@@ -226,6 +267,14 @@ public class CommunityService implements ICommunityService {
         return postMapper.toDto(postRepository.save(post));
     }
 
+    /**
+     * Method returning a page of posts related to a community
+     * @param moduleId id of the community
+     * @param pageNumber page index
+     * @param size number of ratings per page
+     * @param year if given, filters the posts to only be from that year
+     * @return page of filtered posts
+     */
     @Override
     public Page<PostDto> getCommunityPosts(String moduleId, int pageNumber, int size, Optional<Integer> year) {
         Pageable page = PageRequest.of(pageNumber, size);
@@ -242,6 +291,12 @@ public class CommunityService implements ICommunityService {
         return postPage.map(postMapper::toDto);
     }
 
+    /**
+     * Delete a post. Only allowed if the logged in user created the post. Otherwise an exception is thrown.
+     * @param moduleId id of the community
+     * @param postId id of the post to be deleted
+     * @param username of the logged in user
+     */
     @Override
     public void deletePost(String moduleId, Long postId, String username) {
         Optional<User> user = userRepository.findByUsername(username);
@@ -265,6 +320,14 @@ public class CommunityService implements ICommunityService {
         postRepository.delete(post.get());
     }
 
+    /**
+     * Create a new comment related to a post. Exceptions are thrown if the community or the psot does not exist.
+     * @param moduleId id of the community
+     * @param postId id of the post
+     * @param commentDto object containing information about the comment to be added
+     * @param username of the user creating the post
+     * @return created comment
+     */
     @Override
     public CommentDto createComment(String moduleId, Long postId, CommentDto commentDto, String username) {
         Optional<User> user = userRepository.findByUsername(username);
