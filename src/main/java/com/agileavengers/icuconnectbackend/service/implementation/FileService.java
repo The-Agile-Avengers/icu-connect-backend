@@ -67,21 +67,22 @@ public class FileService implements IFileService {
         // save pdf file in S3 and in SQL Database
         String fileName = String.format("%s", multipartFile.getOriginalFilename());
 
+        
+        // recursive function to change name if already exists
+        fileName = rename(fileName, community.get().getModuleId());
+        
+        File file = File.builder()
+        .community(community.get())
+        .creation(new Timestamp(System.currentTimeMillis()))
+        .creator(user.get())
+        .fileName(fileName)
+        .build();
+        
         try {
             fileStore.uploadFile(fileName, Optional.of(metadata), multipartFile.getInputStream());
         } catch (IOException e) {
             throw new IllegalStateException("Failed to upload file", e);
         }
-
-        // recursive function to change name if already exists
-        fileName = rename(fileName, community.get().getModuleId());
-
-        File file = File.builder()
-                .community(community.get())
-                .creation(new Timestamp(System.currentTimeMillis()))
-                .creator(user.get())
-                .fileName(fileName)
-                .build();
 
         file = fileRepository.save(file);
 
