@@ -24,6 +24,10 @@ public class UserController {
     }
 
 
+    /**
+     * Endpoint for a logged in user to query their own details.
+     * @return detailed user object
+     */
     @GetMapping(value = "")
     UserDetailDto getUser() {
         UserDetails principal =

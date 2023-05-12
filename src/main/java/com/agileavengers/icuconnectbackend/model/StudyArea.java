@@ -20,6 +20,9 @@ public class StudyArea {
     @GeneratedValue
     private Long id;
 
+    /**
+     * Name of the study area
+     */
     @Column(unique = true)
     private String name;
 }
