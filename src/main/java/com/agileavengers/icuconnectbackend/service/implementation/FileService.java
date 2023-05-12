@@ -3,7 +3,6 @@ package com.agileavengers.icuconnectbackend.service.implementation;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -16,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.agileavengers.icuconnectbackend.mapper.FileMapper;
-import com.agileavengers.icuconnectbackend.mapper.UserMapper;
 import com.agileavengers.icuconnectbackend.model.Community;
 import com.agileavengers.icuconnectbackend.model.File;
 import com.agileavengers.icuconnectbackend.model.User;
@@ -85,6 +83,10 @@ public class FileService implements IFileService {
                 .fileName(fileName)
                 .build();
 
+        file = fileRepository.save(file);
+
+        file.setFilePath("/communities/" + community.get().getModuleId() + "/files/" + file.getId() + "/download");
+
         fileRepository.save(file);
 
         community.get().getUploadedFiles().add(file);
@@ -147,28 +149,27 @@ public class FileService implements IFileService {
             filePage = fileRepository.findAllByCommunity_ModuleId(moduleId, page);
         }
 
-        for (File f: filePage.getContent()) {
-            f.setFilePath("/comminities/"+community.get().getModuleId()+"/file/"+f.getId()+"/download");
+        for (File f : filePage.getContent()) {
+            f.setFilePath("/communities/" + community.get().getModuleId() + "/files/" + f.getId() + "/download");
         }
 
         return filePage.map(fileMapper::toDto);
     }
 
-    
     private String rename(String fileName, String moduleId) {
-        int count = 0;
+        int count = 1;
         Optional<File> targetFile = fileRepository.findByFileNameAndCommunity_ModuleId(fileName, moduleId);
 
         while (targetFile.isPresent()) {
             int extensionIndex = fileName.lastIndexOf(".");
             int parenthesisIndex = fileName.lastIndexOf("(");
             String extension = "";
-            
+
             if (extensionIndex != -1) {
                 extension = fileName.substring(extensionIndex);
                 fileName = fileName.substring(0, extensionIndex);
             }
-            
+
             if (parenthesisIndex != -1) {
                 fileName = fileName.substring(0, parenthesisIndex);
             }

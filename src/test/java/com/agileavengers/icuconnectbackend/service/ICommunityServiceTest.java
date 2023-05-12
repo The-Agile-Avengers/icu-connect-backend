@@ -30,6 +30,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith({SpringExtension.class, MockitoExtension.class})
@@ -659,7 +660,7 @@ class ICommunityServiceTest {
         Assertions.assertEquals(2L, result.getTotalElements(), "Result should contain two elements.");
         Assertions.assertEquals(1, result.getTotalPages(), "Result should contain one page.");
         Assertions.assertEquals(2, result.getContent().size(), "Result should contain two elements.");
-        Assertions.assertEquals(commentDto, result.getContent().get(0).getCommentList().get(0), "First post of result should contain 1 comment");
+        assertThat(commentDto).usingRecursiveComparison().ignoringFields("creation").isEqualTo(result.getContent().get(0).getCommentList().get(0));
     }
 
     @Test
