@@ -1,6 +1,6 @@
 package com.agileavengers.icuconnectbackend.config;
 
-import com.agileavengers.icuconnectbackend.service.JwtUserDetailsService;
+import com.agileavengers.icuconnectbackend.service.implementation.JwtUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

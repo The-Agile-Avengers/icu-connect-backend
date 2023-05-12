@@ -1,4 +1,4 @@
-package com.agileavengers.icuconnectbackend.service;
+package com.agileavengers.icuconnectbackend.service.implementation;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -23,7 +23,7 @@ public class JwtUserDetailsService implements UserDetailsService {
 
 	private final UserMapper userMapper;
 
-	JwtUserDetailsService(UserRepository userRepository, UserMapper userMapper) {
+	public JwtUserDetailsService(UserRepository userRepository, UserMapper userMapper) {
 		this.userRepository = userRepository;
 		this.userMapper = userMapper;
 	}

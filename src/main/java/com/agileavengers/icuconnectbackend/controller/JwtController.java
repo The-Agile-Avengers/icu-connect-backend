@@ -6,7 +6,7 @@ import com.agileavengers.icuconnectbackend.model.dto.JwtRequestDto;
 import com.agileavengers.icuconnectbackend.model.dto.JwtResponseDto;
 import com.agileavengers.icuconnectbackend.model.dto.RegisterUserDto;
 import com.agileavengers.icuconnectbackend.repository.UserRepository;
-import com.agileavengers.icuconnectbackend.service.JwtUserDetailsService;
+import com.agileavengers.icuconnectbackend.service.implementation.JwtUserDetailsService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
