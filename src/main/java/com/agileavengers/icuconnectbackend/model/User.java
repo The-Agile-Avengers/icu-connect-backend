@@ -34,5 +34,4 @@ public class User {
     private StudyArea studyArea;
 
     private String avatar;
-
 }

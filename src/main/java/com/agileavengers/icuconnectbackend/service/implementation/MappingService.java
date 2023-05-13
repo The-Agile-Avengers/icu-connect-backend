@@ -61,10 +61,6 @@ public class MappingService {
         UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userRepository.findByUsername(principal.getUsername()).get();
 
-        if (!file.getCreator().equals(user)) {
-            return false;
-        } 
-
-        return true;
+        return file.getCreator().equals(user);
     }
 }
