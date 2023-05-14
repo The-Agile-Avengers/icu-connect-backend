@@ -300,7 +300,7 @@ class ICommunityServiceTest {
         Rating rating2 = Rating.builder().creator(user2).community(community).content(5.0).workload(2.0).teaching(4.0).thumbsUp(Collections.<User>emptySet()).build();
         List<Rating> ratingList = List.of(rating, rating2);
 
-        Pageable pageable = PageRequest.of(0, 1, Sort.by("thumbsUp").descending());
+        Pageable pageable = PageRequest.of(0, 1, Sort.by("thumbsUpCount").descending());
         
         when(ratingRepository.findAllByCommunity_ModuleId(community.getModuleId(), pageable))
                 .thenAnswer(i -> {
