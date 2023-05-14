@@ -3,6 +3,7 @@ package com.agileavengers.icuconnectbackend.controller;
 import com.agileavengers.icuconnectbackend.model.dto.CommunityDto;
 import com.agileavengers.icuconnectbackend.model.dto.RatingDto;
 import com.agileavengers.icuconnectbackend.model.dto.UserDetailDto;
+import com.agileavengers.icuconnectbackend.service.IStudyAreaService;
 import com.agileavengers.icuconnectbackend.service.IUserService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,9 +16,11 @@ import java.util.Set;
 public class UserController {
 
     IUserService userService;
+    IStudyAreaService studyAreaService;
 
-    public UserController(IUserService userService) {
+    public UserController(IUserService userService, IStudyAreaService studyAreaService) {
         this.userService = userService;
+        this.studyAreaService = studyAreaService;
     }
 
 

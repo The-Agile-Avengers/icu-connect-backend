@@ -12,6 +12,7 @@ import com.agileavengers.icuconnectbackend.model.dto.UserDetailDto;
 import com.agileavengers.icuconnectbackend.repository.CommunityRepository;
 import com.agileavengers.icuconnectbackend.repository.RatingRepository;
 import com.agileavengers.icuconnectbackend.repository.UserRepository;
+import com.agileavengers.icuconnectbackend.service.IStudyAreaService;
 import com.agileavengers.icuconnectbackend.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,16 +34,19 @@ public class UserService implements IUserService {
     UserRepository userRepository;
     RatingRepository ratingRepository;
 
+    IStudyAreaService studyAreaService;
+
 
 
     @Autowired
-    public UserService(CommunityMapper communityMapper, RatingMapper ratingMapper, UserMapper userMapper, CommunityRepository communityRepository, UserRepository userRepository, RatingRepository ratingRepository) {
+    public UserService(CommunityMapper communityMapper, RatingMapper ratingMapper, UserMapper userMapper, CommunityRepository communityRepository, UserRepository userRepository, RatingRepository ratingRepository, IStudyAreaService studyAreaService) {
         this.communityMapper = communityMapper;
         this.ratingMapper = ratingMapper;
         this.userMapper = userMapper;
         this.communityRepository = communityRepository;
         this.userRepository = userRepository;
         this.ratingRepository = ratingRepository;
+        this.studyAreaService = studyAreaService;
     }
 
     @Override
@@ -121,7 +125,7 @@ public class UserService implements IUserService {
             user.setEmail(update.getEmail());
         }
         if (update.getStudyArea() != null) {
-            user.setStudyArea(update.getStudyArea());
+            user.setStudyArea(studyAreaService.getOrCreateStudyArea(update.getStudyArea()));
         }
         if (update.getAvatar() != null) {
             user.setAvatar(update.getAvatar());

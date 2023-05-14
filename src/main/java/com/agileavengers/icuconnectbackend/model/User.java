@@ -30,7 +30,8 @@ public class User {
     @ManyToMany()
     private Set<Community> subscriptionSet = new HashSet<>();
 
-    private String studyArea;
+    @ManyToOne()
+    private StudyArea studyArea;
 
     private String avatar;
 
