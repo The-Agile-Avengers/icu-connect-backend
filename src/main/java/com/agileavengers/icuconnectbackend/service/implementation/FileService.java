@@ -27,6 +27,7 @@ import com.agileavengers.icuconnectbackend.repository.PostRepository;
 import com.agileavengers.icuconnectbackend.repository.RatingRepository;
 import com.agileavengers.icuconnectbackend.repository.UserRepository;
 import com.agileavengers.icuconnectbackend.service.IFileService;
+import com.agileavengers.icuconnectbackend.service.common.ServiceHelper;
 
 import lombok.AllArgsConstructor;
 
@@ -41,6 +42,7 @@ public class FileService implements IFileService {
     RatingRepository ratingRepository;
     UserRepository userRepository;
     CommentRepository commentRepository;
+    ServiceHelper serviceHelper;
     private final FileMapper fileMapper;
 
     @Override
@@ -58,6 +60,8 @@ public class FileService implements IFileService {
         if (community.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community does not exist");
         }
+
+        serviceHelper.isJoined(user.get(), community.get());
 
         // get file metadata
         Map<String, String> metadata = new HashMap<>();
@@ -124,6 +128,7 @@ public class FileService implements IFileService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community does not exist");
         }
 
+        
         if (!user.get().equals(fileToDelete.get().getCreator())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "user is not allowed to delete file");
         }

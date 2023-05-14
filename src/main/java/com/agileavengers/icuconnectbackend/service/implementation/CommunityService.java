@@ -5,6 +5,8 @@ import com.agileavengers.icuconnectbackend.model.*;
 import com.agileavengers.icuconnectbackend.model.dto.*;
 import com.agileavengers.icuconnectbackend.repository.*;
 import com.agileavengers.icuconnectbackend.service.ICommunityService;
+import com.agileavengers.icuconnectbackend.service.common.ServiceHelper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,13 +36,14 @@ public class CommunityService implements ICommunityService {
     RatingRepository ratingRepository;
     UserRepository userRepository;
     CommentRepository commentRepository;
+    ServiceHelper serviceHelper;
 
     @Autowired
     public CommunityService(CommunityRepository communityRepository,
             InstructorRepository instructorRepository, RatingRepository ratingRepository,
             UserRepository userRepository, CommunityMapper communityMapper, RatingMapper ratingMapper,
             InstructorMapper instructorMapper, PostRepository postRepository, PostMapper postMapper,
-            CommentMapper commentMapper, CommentRepository commentRepository) {
+            CommentMapper commentMapper, CommentRepository commentRepository, ServiceHelper serviceHelper) {
         this.communityRepository = communityRepository;
         this.instructorRepository = instructorRepository;
         this.ratingRepository = ratingRepository;
@@ -52,6 +55,7 @@ public class CommunityService implements ICommunityService {
         this.postMapper = postMapper;
         this.commentMapper = commentMapper;
         this.commentRepository = commentRepository;
+        this.serviceHelper = serviceHelper;
     }
 
     /**
@@ -168,6 +172,8 @@ public class CommunityService implements ICommunityService {
         User user = userOptional.get();
         Rating rating = ratingOptional.get();
 
+        serviceHelper.isJoined(user, rating.getCommunity());
+
         return ratingMapper.toDto(ratingRepository.save(rating.modifyThumbsUp(user)));
     }
 
@@ -203,6 +209,8 @@ public class CommunityService implements ICommunityService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "ratings are not within range");
         }
+
+        serviceHelper.isJoined(user.get(), community.get());
 
         Rating rating = ratingMapper.fromDto(ratingDto);
         rating.setCommunity(community.get());
@@ -256,6 +264,8 @@ public class CommunityService implements ICommunityService {
         if (community.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community does not exist");
         }
+
+        serviceHelper.isJoined(user.get(), community.get());
 
         Post post = postMapper.fromDto(postDto);
         post.setCreator(user.get());
@@ -313,6 +323,8 @@ public class CommunityService implements ICommunityService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized to delete this post. This post was created by another user.");
         }
 
+        serviceHelper.isJoined(user.get(), post.get().getCommunity());
+
         List<Comment> commentsToDelete = commentRepository.findAllByPost_Id(postId);
         for (Comment comment : commentsToDelete) {
             commentRepository.delete(comment);
@@ -342,6 +354,8 @@ public class CommunityService implements ICommunityService {
         if (post.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post does not exist");
         }
+
+        serviceHelper.isJoined(user.get(), community.get());
 
         Comment comment = commentMapper.fromDto(commentDto);
         comment.setCreator(user.get());
