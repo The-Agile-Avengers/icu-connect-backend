@@ -2,7 +2,7 @@ Write-Host "." -NoNewline
 Write-Host "`n# stop and destroy existing containers"
 docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
 Write-Host "Done"
-Start-Process powershell.exe -ArgumentList "docker run --rm -it -p 4566:4566 -p 4510-4559:4510-4559 -v /var/run/docker.sock:/var/run/docker.sock -e PERSISTENCE=1 -e LOCALSTACK_API_KEY=50r6qhtzfz localstack/localstack-pro" -WindowStyle Normal
+Start-Process powershell.exe -ArgumentList "docker run --rm -it -p 4566:4566 -p 4510-4559:4510-4559 -v /var/run/docker.sock:/var/run/docker.sock -e PERSISTENCE=1 -e LOCALSTACK_API_KEY=<key> localstack/localstack-pro" -WindowStyle Normal
 
 Start-Sleep -s 5
 while ((Test-NetConnection -ComputerName localhost -Port 4566 -InformationLevel Quiet) -ne $true)
