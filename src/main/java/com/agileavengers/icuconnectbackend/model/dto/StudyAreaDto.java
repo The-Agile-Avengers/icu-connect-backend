@@ -13,6 +13,9 @@ import lombok.NoArgsConstructor;
 public class StudyAreaDto {
     private Long id;
 
+    /**
+     * Name of the study area
+     */
     private String name;
 
 }

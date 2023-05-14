@@ -20,6 +20,9 @@ public class Instructor {
     @GeneratedValue
     private Long id;
 
+    /**
+     * Instructor name, format preferably "Title Firstname Lastname"
+     */
     @Column(unique = true)
     private String name;
 

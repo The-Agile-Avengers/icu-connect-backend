@@ -10,7 +10,6 @@ import org.springframework.data.domain.Page;
 import java.util.Optional;
 
 public interface ICommunityService {
-    CommunityDto setupExampleCommunity();
 
     CommunityDto createCommunity(CommunityDto communityDto);
 

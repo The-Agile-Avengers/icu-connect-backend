@@ -9,6 +9,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * Controller for study area.
+ * Functionality will be extended, once study areas contain more information.
+ */
+
 @RestController
 @RequestMapping("/studyareas")
 public class StudyAreaController {
@@ -20,6 +25,11 @@ public class StudyAreaController {
         this.studyAreaService = studyAreaService;
     }
 
+    /**
+     * Queries all currently available study areas
+     *
+     * @return List of study areas
+     */
     @GetMapping(value = "")
     List<StudyAreaDto> getAllStudyAreas() {
         return studyAreaService.getStudyAreas();

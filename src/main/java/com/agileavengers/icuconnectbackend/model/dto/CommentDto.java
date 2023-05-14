@@ -16,10 +16,19 @@ import java.sql.Timestamp;
 public class CommentDto {
     private Long id;
 
+    /**
+     * The user that created the comment
+     */
     private UserDto user;
 
+    /**
+     * Time when the comment was created
+     */
     private Timestamp creation;
 
+    /**
+     * Content of the comment
+     */
     @NotBlank(message = "Text field should not be null")
     private String text;
 }

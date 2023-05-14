@@ -13,12 +13,21 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RegisterUserDto {
 
+    /**
+     * username to be registered
+     */
     @NotNull(message = "Invalid name: Name is NULL")
     private String username;
 
+    /**
+     * Password to be set
+     */
     @NotNull(message = "Invalid password: Password is NULL")
     private String password;
 
+    /**
+     * Email of the new user
+     */
     @Email(message = "Invalid e-mail")
     @NotNull(message = "Invalid e-mail: E-mail is NULL")
     private String email;

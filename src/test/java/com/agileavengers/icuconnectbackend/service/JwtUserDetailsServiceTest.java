@@ -5,6 +5,7 @@ import com.agileavengers.icuconnectbackend.model.User;
 import com.agileavengers.icuconnectbackend.model.dto.JwtRequestDto;
 import com.agileavengers.icuconnectbackend.model.dto.RegisterUserDto;
 import com.agileavengers.icuconnectbackend.repository.UserRepository;
+import com.agileavengers.icuconnectbackend.service.implementation.JwtUserDetailsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

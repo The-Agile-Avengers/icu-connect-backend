@@ -13,6 +13,9 @@ import lombok.NoArgsConstructor;
 public class InstructorDto {
     private Long id;
 
+    /**
+     * Name of the instructor
+     */
     private String name;
 
 }

@@ -21,18 +21,38 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * unique username
+     */
+    @Column(unique = true)
     private String username;
 
+    /**
+     * Email of the user. Should not be visible for other users apart from the user itself
+     */
+    @Column(unique = true)
     private String email;
 
+    /**
+     * Encoded password
+     */
     private String password;
 
+    /**
+     * Communities that the user subscribed
+     */
     @ManyToMany()
     private Set<Community> subscriptionSet = new HashSet<>();
 
+    /**
+     * Study area of the user
+     */
     @ManyToOne()
     private StudyArea studyArea;
 
+    /**
+     * Selected avatar (number between 1 - 10)
+     */
     private String avatar;
 
 }

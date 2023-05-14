@@ -23,11 +23,21 @@ public class StudyAreaService implements IStudyAreaService {
         this.studyAreaRepository = studyAreaRepository;
     }
 
+    /**
+     * Get a list of all currently defined study areas
+     * @return list of study areas
+     */
     @Override
     public List<StudyAreaDto> getStudyAreas() {
         return studyAreaRepository.findAll().stream().map(studyAreaMapper::toDto).toList();
     }
 
+    /**
+     * Get study area object from database if it exists. Else create and persist a new object.
+     * @param studyArea object containing name that should be looked for
+     * @return retrieved or created object
+     */
+    @Override
     public StudyArea getOrCreateStudyArea(StudyArea studyArea) {
         Optional<StudyArea> optionalStudyArea = studyAreaRepository.findStudyAreaByName(studyArea.getName());
         return optionalStudyArea.orElseGet(() -> studyAreaRepository.save(studyArea));

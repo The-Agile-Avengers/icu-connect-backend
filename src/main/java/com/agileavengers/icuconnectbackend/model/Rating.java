@@ -20,21 +20,50 @@ public class Rating {
     @GeneratedValue
     private Long id;
 
+    /**
+     * user that created the rating
+     */
     @ManyToOne
     private User creator;
+    /**
+     * Time when the rating was created
+     */
     private Timestamp creation;
 
+    /**
+     * The community that is rated
+     */
     @ManyToOne
     private Community community;
+    /**
+     * Score for the teaching style between 0-5
+     */
     private Double teaching;
+    /**
+     * Score for the lecture content between 0-5
+     */
     private Double content;
+    /**
+     * Score for the required workload between 0-5
+     */
     private Double workload;
 
+    /**
+     * Optional text explaining the given scores
+     */
     private String text;
 
+    /**
+     * Users that deemed the rating as useful
+     */
     @ManyToMany
     private Set<User> thumbsUp;
 
+    /**
+     * Method to update if the user has liked the rating or not
+     * @param user that wants to change the status of their like
+     * @return updated rating
+     */
     public Rating modifyThumbsUp(User user) {
         if (this.thumbsUp.contains(user)) {
             this.thumbsUp.remove(user);

@@ -1,4 +1,4 @@
-package com.agileavengers.icuconnectbackend.service;
+package com.agileavengers.icuconnectbackend.service.implementation;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -23,11 +23,17 @@ public class JwtUserDetailsService implements UserDetailsService {
 
 	private final UserMapper userMapper;
 
-	JwtUserDetailsService(UserRepository userRepository, UserMapper userMapper) {
+	public JwtUserDetailsService(UserRepository userRepository, UserMapper userMapper) {
 		this.userRepository = userRepository;
 		this.userMapper = userMapper;
 	}
 
+    /**
+     * Query the user from the database by a username.
+     * @param username string to be queried
+     * @return details of the user
+     * @throws UsernameNotFoundException if the username is not present in the database
+     */
 	@Override
 	@Transactional
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -42,6 +48,12 @@ public class JwtUserDetailsService implements UserDetailsService {
                 user.getPassword(), new ArrayList<>());
     }
 
+    /**
+     * Create a new user according to details provided. Throws an exception if the username or the email are taken.
+     * @param registerUserDto details to be stored in the database
+     * @return created and persisted user object
+     * @throws ResponseStatusException if username or email are taken
+     */
 	public User saveUser(RegisterUserDto registerUserDto) throws ResponseStatusException {
 		if (userRepository.findByUsername(registerUserDto.getUsername()).isPresent()) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already taken.");
