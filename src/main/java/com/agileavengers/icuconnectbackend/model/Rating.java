@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Formula;
 
 import java.sql.Timestamp;
 import java.util.Set;
@@ -58,6 +59,12 @@ public class Rating {
      */
     @ManyToMany
     private Set<User> thumbsUp;
+
+    /**
+     * Count of Users that deemed the rating as useful
+     */
+    @Formula("(SELECT COUNT(*) FROM rating_thumbs_up as obj WHERE obj.rating_id = id)")
+    private Integer thumbsUpCount;
 
     /**
      * Method to update if the user has liked the rating or not
