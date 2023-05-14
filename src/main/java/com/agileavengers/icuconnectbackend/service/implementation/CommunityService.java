@@ -133,10 +133,12 @@ public class CommunityService implements ICommunityService {
      */
     @Override
     public Page<RatingDto> getCommunityRatings(String moduleId, int page, int size, Optional<Boolean> sortByMostLiked) {
-        Sort sort = Sort.by("thumbsUp").descending();
-        if (sortByMostLiked.isPresent() && !sortByMostLiked.get()) {
-            sort = Sort.by("creation").descending();
+        Sort sort =  Sort.by("creation").descending(); 
+        
+        if (sortByMostLiked.isPresent() && sortByMostLiked.get()) {
+            sort = Sort.by("thumbsUp").descending();
         }
+        
         Pageable pageable = PageRequest.of(page, size, sort);
         Optional<Community> community = communityRepository.findCommunityByModuleId(moduleId);
         if (community.isEmpty()) {
