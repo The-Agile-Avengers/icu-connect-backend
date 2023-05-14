@@ -54,5 +54,4 @@ public class User {
      * Selected avatar (number between 1 - 10)
      */
     private String avatar;
-
 }
