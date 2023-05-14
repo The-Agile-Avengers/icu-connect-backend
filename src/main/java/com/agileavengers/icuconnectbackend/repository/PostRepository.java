@@ -20,7 +20,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
      */
     Page<Post> findAllByCommunity_ModuleId(String moduleId, Pageable pageable);
 
-    Page<Post> findAllByCreationBetween(Timestamp begin, Timestamp end, Pageable pageable);
+    Page<Post> findAllByCommunity_ModuleIdAndCreationBetween(String moduleId, Timestamp begin, Timestamp end, Pageable pageable);
     Optional<Post> findByIdAndCommunity_ModuleId(Long id, String moduleId);
 
     Boolean existsByCommunity_ModuleIdAndId(String moduleId, Long id);

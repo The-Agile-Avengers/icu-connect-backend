@@ -284,7 +284,7 @@ public class CommunityService implements ICommunityService {
         }
         Page<Post> postPage;
         if (year.isPresent()) {
-            postPage = postRepository.findAllByCreationBetween(Timestamp.valueOf(year.get() + "-01-01 00:00:00.0"), Timestamp.valueOf(year.get() + "-12-31 23:59:59.9"), page);
+            postPage = postRepository.findAllByCommunity_ModuleIdAndCreationBetween(moduleId, Timestamp.valueOf(year.get() + "-01-01 00:00:00.0"), Timestamp.valueOf(year.get() + "-12-31 23:59:59.9"), page);
         } else {
             postPage = postRepository.findAllByCommunity_ModuleId(moduleId, page);
         }
