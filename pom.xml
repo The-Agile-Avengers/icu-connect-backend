@@ -13,8 +13,48 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>icu-connect-backend</name>
 	<description>ICU Connect Backend</description>
+<profiles>
+    <profile>
+		<id>coverage</id>
+		<build>
+		<plugins>
+			<plugin>
+			<groupId>org.jacoco</groupId>
+			<artifactId>jacoco-maven-plugin</artifactId>
+			<version>0.8.7</version>
+			<executions>
+				<execution>
+				<id>prepare-agent</id>
+				<goals>
+					<goal>prepare-agent</goal>
+				</goals>
+				</execution>
+				<execution>
+				<id>report</id>
+				<goals>
+					<goal>report</goal>
+				</goals>
+				<configuration>
+					<formats>
+					<format>XML</format>
+					</formats>
+				</configuration>
+				</execution>
+			</executions>
+			</plugin>
+		</plugins>
+		</build>               
+    </profile>
+    <profile>
+        <id>live</id>
+    </profile>
+    <profile>
+        <id>main</id>
+        <activation>
+            <activeByDefault>true</activeByDefault>
+        </activation>
 
-	<dependencies>
+		<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
@@ -71,6 +111,12 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>runtime</scope>
 			<version>8.0.32</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.sonarsource.scanner.maven</groupId>
+			<artifactId>sonar-maven-plugin</artifactId>
+			<version>3.9.1.2184</version>
 		</dependency>
 
 <!--		<dependency>-->
@@ -200,5 +246,10 @@
             </plugin>
 		</plugins>
 	</build>
+    </profile>
+</profiles>
+    
+
+	
 
 </project>
