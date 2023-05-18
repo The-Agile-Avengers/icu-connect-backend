@@ -1,4 +1,5 @@
 # icu-connect-backend
+[![Stable Build](https://github.com/The-Agile-Avengers/icu-connect-backend/actions/workflows/maven.yml/badge.svg)](https://github.com/The-Agile-Avengers/icu-connect-backend/actions/workflows/ci_cd_pipeline.yml) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=The-Agile-Avengers_icu-connect-backend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=The-Agile-Avengers_icu-connect-backend)
 ## Requirements
 - [Docker](https://www.docker.com/products/docker-desktop/) 
 - Java 17
