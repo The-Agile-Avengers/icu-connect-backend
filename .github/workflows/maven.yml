@@ -49,4 +49,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: mvn verify sonar:sonar -Dsonar.projectKey=The-Agile-Avengers_icu-connect-backend -Dsonar.host.url="https://sonarcloud.io" -Dsonar.organization=the-agile-avengers -Dsonar.projectKey=The-Agile-Avengers_icu-connect-backend -Dsonar.coverage.jacoco.xmlReportPaths=target\site\jacoco\jacoco.xml -Dsonar.sources=src\main\java\com\agileavengers\icuconnectbackend\services
+      run: mvn verify sonar:sonar -Dsonar.projectKey=The-Agile-Avengers_icu-connect-backend -Dsonar.host.url="https://sonarcloud.io" -Dsonar.organization=the-agile-avengers -Dsonar.projectKey=The-Agile-Avengers_icu-connect-backend -Dsonar.coverage.jacoco.xmlReportPaths=target\site\jacoco\jacoco.xml -Dsonar.sources=src/main/java/com/agileavengers/icuconnectbackend/service
