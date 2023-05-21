@@ -8,9 +8,13 @@ import com.agileavengers.icuconnectbackend.model.dto.RatingAverage;
 import com.agileavengers.icuconnectbackend.repository.RatingRepository;
 import com.agileavengers.icuconnectbackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Optional;
 
 @Service
 public class MappingService {
@@ -59,7 +63,11 @@ public class MappingService {
     public Boolean isJoined(Community community) {
         UserDetails principal =
                 (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userRepository.findByUsername(principal.getUsername()).get();
+        Optional<User> userOptional = userRepository.findByUsername(principal.getUsername());
+        if (userOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "user does not exist");
+        }
+        User user = userOptional.get();
         if (user.getSubscriptionSet() == null) {
             return false;
         }
@@ -73,9 +81,12 @@ public class MappingService {
      */
     public Boolean getHasLiked(Rating rating) {
         UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userRepository.findByUsername(principal.getUsername()).get();
+        Optional<User> user = userRepository.findByUsername(principal.getUsername());
+        if (user.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "user does not exist");
+        }
 
-        if (!rating.getThumbsUp().contains(user)) {
+        if (!rating.getThumbsUp().contains(user.get())) {
             return false;
         } 
 
@@ -84,8 +95,10 @@ public class MappingService {
 
     public Boolean getHasUploaded(File file) {
         UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = userRepository.findByUsername(principal.getUsername()).get();
-
-        return file.getCreator().equals(user);
+        Optional<User> user = userRepository.findByUsername(principal.getUsername());
+        if (user.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "user does not exist");
+        }
+        return file.getCreator().equals(user.get());
     }
 }
