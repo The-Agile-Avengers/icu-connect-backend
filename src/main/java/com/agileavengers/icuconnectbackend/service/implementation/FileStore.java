@@ -1,5 +1,7 @@
 package com.agileavengers.icuconnectbackend.service.implementation;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -36,8 +38,27 @@ public class FileStore {
         });
 
         try {
-            awsS3Client.putObject(bucketName, fileName, iStream, objectMetadata);
-        } catch (AmazonServiceException e) {
+//            awsS3Client.putObject(bucketName, fileName, iStream, objectMetadata);
+            // Create a temporary file
+            File tempFile = File.createTempFile("temp", ".tmp");
+
+            // Delete the temporary file when the program exits
+            tempFile.deleteOnExit();
+
+            // Write the contents of the input stream to the temporary file
+            FileOutputStream outputStream = new FileOutputStream(tempFile);
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = iStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            // Close the streams
+            iStream.close();
+            outputStream.close();
+
+            awsS3Client.putObject(bucketName, fileName, tempFile);
+        } catch (AmazonServiceException | IOException e) {
             throw new IllegalStateException("Failed to upload, URI: " + bucketName, e);
         }
     }
