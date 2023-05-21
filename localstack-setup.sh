@@ -1,56 +1,59 @@
 #!/bin/bash
 
-echo "\n\n\n\n# stop and destroy existing containers"
-docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
-echo "\033[32m\xE2\x9C\x94 Done\033[0m"
+echo "Please enter localstack PRO account API key:"
+read localstack_api_key
 
-echo "\n\n\n\n# start localstack"
+echo -e "\n\n\n\n# stop and destroy existing containers"
+docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
+echo -e "\033[32m\xE2\x9C\x94 Done\033[0m"
+
+echo -e "\n\n\n\n# start localstack"
 
 #!/bin/bash
 
 # Open a new terminal and execute the Docker command
 osascript <<END
 tell application "Terminal"
-    do script "docker run --rm -it -p 4566:4566 -p 4510-4559:4510-4559 -v /var/run/docker.sock:/var/run/docker.sock -e PERSISTENCE=1 -e LOCALSTACK_API_KEY=2FJ6BzYyuP localstack/localstack-pro"
+    do script "docker run --rm -it -p 4566:4566 -p 4510-4559:4510-4559 -v /var/run/docker.sock:/var/run/docker.sock -e PERSISTENCE=1 -e LOCALSTACK_API_KEY=$localstack_api_key localstack/localstack-pro"
 end tell
 END
 
 
 # Wait until localhost:4566 is available
-echo "Listening for localstack startup"
-echo "."
+echo -e "Listening for localstack startup"
+echo -e "."
 while ! nc -z localhost 4566; do
-  echo "."
+  echo -e "."
   sleep 0.5
 done
 
 # Proceed with commands in the script
-echo "\n\n\n\nConnected to localstack (localhost:4566) \033[32m\xE2\x9C\x94 Done\033[0m"
+echo -e "\n\n\n\nConnected to localstack (localhost:4566) \033[32m\xE2\x9C\x94 Done\033[0m"
 
-echo "\n\n\n\nSetup Localstack Env"
+echo -e "\n\n\n\nSetup Localstack Env"
 
-echo "# setup files S3 bucket"
+echo -e "# setup files S3 bucket"
 awslocal s3api create-bucket --bucket icufiles --create-bucket-configuration LocationConstraint=eu-west-1
 
-echo "\n\n\n\n# setup RDS MySql database"
+echo -e "\n\n\n\n# setup RDS MySql database"
 awslocal rds create-db-cluster --db-cluster-identifier dbcluster1 --engine mysql --database-name icudb1
 
-echo "\033[32m\xE2\x9C\x94 Done\033[0m"
+echo -e "\033[32m\xE2\x9C\x94 Done\033[0m"
 
-echo "\n\n\n\n# build maven project (JAR)"
+echo -e "\n\n\n\n# build maven project (JAR)"
 mvn clean package
-echo "\033[32m\xE2\x9C\x94 Done\033[0m"
+echo -e "\033[32m\xE2\x9C\x94 Done\033[0m"
 
-echo "\n\n\n\n# register backend image in ECR"
+echo -e "\n\n\n\n# register backend image in ECR"
 awslocal ecr create-repository --repository-name icubackend
 docker build -t localhost.localstack.cloud:4511/icubackend .
 docker push localhost.localstack.cloud:4511/icubackend:latest
-echo "\033[32m\xE2\x9C\x94 Done\033[0m"
+echo -e "\033[32m\xE2\x9C\x94 Done\033[0m"
 
-echo "\n\n\n\n# setup ECS"
+echo -e "\n\n\n\n# setup ECS"
 awslocal ecs create-cluster --cluster-name icubackend-cluster
 
-echo "# create ECS Task Definition"
+echo -e "# create ECS Task Definition"
 awslocal ecs register-task-definition \
     --family icubackend-task-definition \
     --network-mode awsvpc \
@@ -77,20 +80,20 @@ awslocal ecs register-task-definition \
     ]' \
     --requires-compatibilities FARGATE
 
-echo "# create VPC"
+echo -e "# create VPC"
 vpc_id=$(awslocal ec2 create-vpc --cidr-block 10.0.0.0/16 --query 'Vpc.VpcId' --output text)
 
-echo "# create subnets"
+echo -e "# create subnets"
 subnet1_id=$(awslocal ec2 create-subnet --vpc-id "$vpc_id" --cidr-block 10.0.1.0/24 --availability-zone eu-west-1a --query 'Subnet.SubnetId' --output text)
 subnet2_id=$(awslocal ec2 create-subnet --vpc-id "$vpc_id" --cidr-block 10.0.2.0/24 --availability-zone eu-west-1b --query 'Subnet.SubnetId' --output text)
 
-echo "# create security group"
+echo -e "# create security group"
 security_group_id=$(awslocal ec2 create-security-group --group-name ecs-security-group --description "ECS Security Group" --vpc-id "$vpc_id" --query 'GroupId' --output text)
 
-echo "# add inbound traffic rules to security group"
+echo -e "# add inbound traffic rules to security group"
 awslocal ec2 authorize-security-group-ingress --group-id "$security_group_id" --protocol tcp --port 8080 --cidr 0.0.0.0/0
 
-echo "# create ECS service"
+echo -e "# create ECS service"
 awslocal ecs create-service \
     --cluster icubackend-cluster \
     --service-name icubackend-service \
@@ -113,7 +116,7 @@ awslocal ecs create-service \
     }" \
     --scheduling-strategy REPLICA
 
-echo "\033[32m\xE2\x9C\x94 Done\033[0m"
+echo -e "\033[32m\xE2\x9C\x94 Done\033[0m"
 
 # Set the initial value of the port variable to an empty string
 port=""
@@ -135,10 +138,15 @@ done
 GREEN='\033[0;32m'
 NO_COLOR='\033[0m'
 
-echo "${GREEN}  ___ _   _  ___ ___ ___ ___ ___ "
-echo " / __| | | |/ __/ __| __/ __/ __|"
-echo " \__ | |_| | (_| (__| _|\__ \__ \\"
-echo " |___/\___/ \___\___|___|___|___/${NO_COLOR}"
-echo "                                 "
+echo -e "${GREEN}  ___ _   _  ___ ___ ___ ___ ___ "
+echo -e " / __| | | |/ __/ __| __/ __/ __|"
+echo -e " \__ | |_| | (_| (__| _|\__ \__ \\"
+echo -e " |___/\___/ \___\___|___|___|___/${NO_COLOR}"
+echo -e "                                 "
 
-echo "The ECS container port is $port"
+echo -e "The ECS container port is $port"
+
+port_only=${port:8}
+echo -e "\nGo to the frontend repository and run the following command to start the ICU-CONNECT client:\n"
+echo -e "REACT_APP_BACKEND_PORT=$port_only npm start"
+echo -e "\n"
