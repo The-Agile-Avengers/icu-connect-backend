@@ -10,11 +10,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InstructorDto {
+public class StudyAreaDto {
     private Long id;
 
     /**
-     * Name of the instructor
+     * Name of the study area
      */
     private String name;
 

@@ -19,15 +19,27 @@ public class Comment {
     @GeneratedValue
     private Long id;
 
+    /**
+     * User that created the comment
+     */
     @ManyToOne
     private User creator;
 
+    /**
+     * Time when the comment was posted
+     */
     @Temporal(TemporalType.TIMESTAMP)
     private Timestamp creation;
 
+    /**
+     * Post that the comment belongs to
+     */
     @ManyToOne
     private Post post;
 
+    /**
+     * Content of the comment
+     */
     private String text;
 
 }

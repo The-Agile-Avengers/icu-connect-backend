@@ -9,21 +9,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
 @Data
+@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Instructor {
+public class StudyArea {
     @Id
     @Column(nullable = false)
     @GeneratedValue
     private Long id;
 
     /**
-     * Instructor name, format preferably "Title Firstname Lastname"
+     * Name of the study area
      */
     @Column(unique = true)
     private String name;
-
 }

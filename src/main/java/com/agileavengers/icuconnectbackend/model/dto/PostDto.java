@@ -18,13 +18,22 @@ public class PostDto {
     private UserDto user;
     private Timestamp creation;
 
+    /**
+     * Title of the post
+     */
     @NotBlank(message = "Title cannot be blank")
     private String title;
+    /**
+     * Content of the post
+     */
     @NotBlank(message = "Text cannot be blank")
     private String text;
     /**
      * Possible link to MongoDB
      */
     private String documentId;
+    /**
+     * Comments made concerning the post
+     */
     private List<CommentDto> commentList;
 }

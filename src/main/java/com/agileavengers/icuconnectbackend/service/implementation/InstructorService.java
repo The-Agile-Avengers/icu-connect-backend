@@ -22,6 +22,10 @@ public class InstructorService implements IInstructorService {
         this.instructorRepository = instructorRepository;
     }
 
+    /**
+     * Query all instructors and map them to the DTO.
+     * @return lsit of all instructor dtos
+     */
     @Override
     public List<InstructorDto> getAllInstructors() {
         return instructorRepository.findAll().stream().map(instructorMapper::toDto).collect(Collectors.toList());

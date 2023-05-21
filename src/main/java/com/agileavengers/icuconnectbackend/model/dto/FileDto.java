@@ -1,21 +1,27 @@
 package com.agileavengers.icuconnectbackend.model.dto;
 
+import java.sql.Timestamp;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InstructorDto {
+
+public class FileDto {
     private Long id;
 
-    /**
-     * Name of the instructor
-     */
-    private String name;
+    private UserDto user;
 
+    private Timestamp creation;
+
+    private String filePath;
+
+    private String fileName;
+
+    private boolean hasUploaded;
 }
