@@ -4,34 +4,25 @@
 - [Docker](https://www.docker.com/products/docker-desktop/) 
 - Java 17
 - [Maven](https://www.baeldung.com/install-maven-on-windows-linux-mac)
-## Get Started
-1. Clone the repository
-2. Edit env.properties file with your credentials
-3. Edit docker-compose file with your credentials
+- [Localstack](https://docs.localstack.cloud/user-guide/integrations/aws-cli/#localstack-aws-cli-awslocal) (you need the pro version) 
+- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 
-### Run backend in an editor
-4. Install the maven dependencies with `mvn dependencies:resolve`
-5. Comment out the configuration for the backend in the docker-compose file, so that only the database and volume config is left.
-6. Run `docker-compose up -d` which will start your database container.
-7. Use your editor to start the backend. This should set up the tables in the database and then it is ready to be used.
+## Setup
+### Docker Version
+Execute the following commands:
+1. `mvn clean package`
+2. `docker build -t icu-connect-backend .`
+3. `docker-compose up -d` 
+This will start a MySQL database and the backend server as separate containers. After waiting until both containers are up and running, open a new terminal and run:
+4. `docker run --rm -it -p 4566:4566 -p 4510-4559:4510-4559 -v /var/run/docker.sock:/var/run/docker.sock -e PERSISTENCE=1 -e LOCALSTACK_API_KEY=**<your_key>** localstack/localstack-pro`
+5. `awslocal s3api create-bucket --bucket icufiles --create-bucket-configuration LocationConstraint=eu-west-1`
 
-### Run backend in a docker container
-6. Run `docker-compose up -d` which will start your database and your backend container.
+Again you need LocalStack Pro to execute command #4.
+These last two commands will initialize a LocalStack container and create an [S3](https://docs.localstack.cloud/user-guide/aws/s3/) bucket that we will use for file uploading.
+Congratulations your backend on **port 8080** is good to go!
+
+These last two commands will initialize a LocalStack container and create an S3 bucket that we will use for file uploading. Congratulations your backend on port 8080 is good to go!
+Youll find further information [here](https://github.com/The-Agile-Avengers/icu-connect-frontend/wiki/2.3-Installation-and-Setup)
 
 ### OpenAPI
 To access the openAPI resource visit: `localhost:8080/swagger-ui/index.html`
-
-### Localstack
-#### S3 File System
-1. Set your `LOCALSTACK_API_KEY` in `docker-compose-localstack-pro`
-1. Execute `docker-compose -f docker-compose-localstack-pro up`
-2. SSH into container or open Docker Desktop and open the terminal of the container
-3. In the container terminal, execute  `aws configure`
-4. Set `AWS Access Key ID` to whatever you like (and remember the value)
-5. Set `AWS Secret Access Key` to whatever you like (and remember the value)
-6. Set `Default region name` to `eu-west-1`
-7. Set `Default output format` to `json`
-8. Execute `aws --endpoint-url=http://localhost:4566 s3 mb s3://icu.connect`
-9. In the application.properties file of the project set `config.aws.s3.access-key`
-`config.aws.s3.secret-key` and `config.aws.region` to the values you chose before
-10. Run the Application
