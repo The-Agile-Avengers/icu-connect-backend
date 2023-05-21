@@ -29,8 +29,8 @@ echo "\n\n\n\nConnected to localstack (localhost:4566) \033[32m\xE2\x9C\x94 Done
 
 echo "\n\n\n\nSetup Localstack Env"
 
-echo "# setup frontend S3 bucket"
-awslocal s3api create-bucket --bucket icufrontend --create-bucket-configuration LocationConstraint=eu-west-1
+echo "# setup files S3 bucket"
+awslocal s3api create-bucket --bucket icufiles --create-bucket-configuration LocationConstraint=eu-west-1
 
 echo "\n\n\n\n# setup RDS MySql database"
 awslocal rds create-db-cluster --db-cluster-identifier dbcluster1 --engine mysql --database-name icudb1
@@ -43,8 +43,8 @@ echo "\033[32m\xE2\x9C\x94 Done\033[0m"
 
 echo "\n\n\n\n# register backend image in ECR"
 awslocal ecr create-repository --repository-name icubackend
-docker build -t localhost:4511/icubackend .
-docker push localhost:4511/icubackend:latest
+docker build -t localhost.localstack.cloud:4511/icubackend .
+docker push localhost.localstack.cloud:4511/icubackend:latest
 echo "\033[32m\xE2\x9C\x94 Done\033[0m"
 
 echo "\n\n\n\n# setup ECS"
