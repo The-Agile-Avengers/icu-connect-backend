@@ -57,7 +57,7 @@ awslocal ecs register-task-definition \
     --container-definitions '[
         {
             "name": "icubackend",
-            "image": "localhost.localstack.cloud:4511/icubackend:5",
+            "image": "localhost.localstack.cloud:4511/icubackend:latest",
             "essential": true,
             "portMappings": [
                 {
