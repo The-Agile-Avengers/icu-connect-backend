@@ -135,6 +135,7 @@ do
 done
 
 # The port variable now contains the host port that maps to port 8080 in a container
+RED='\033[0;31m'
 GREEN='\033[0;32m'
 NO_COLOR='\033[0m'
 
@@ -144,9 +145,7 @@ echo -e " \__ | |_| | (_| (__| _|\__ \__ \\"
 echo -e " |___/\___/ \___\___|___|___|___/${NO_COLOR}"
 echo -e "                                 "
 
-echo -e "The ECS container port is $port"
-
 port_only=${port:8}
-echo -e "\nGo to the frontend repository and run the following command to start the ICU-CONNECT client:\n"
+echo -e "\n${RED}Go to the frontend repository and run the following command to start the ICU-CONNECT client:${NO_COLOR}\n"
 echo -e "REACT_APP_BACKEND_PORT=$port_only npm start"
 echo -e "\n"
