@@ -5,6 +5,7 @@ services:
     container_name: mysqldb
     image: mysql:latest
     environment:
+      - MYSQL_ROOT_PASSWORD=test
       - MYSQL_DATABASE=icudb1
       - MYSQL_USER=test
       - MYSQL_PASSWORD=test
@@ -24,7 +25,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: test
       SPRING_DATASOURCE_USER: test
       SPRING_DATASOURCE_NAME: icudb1
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:4510/icudb1?createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/icudb1?createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
     depends_on:
       - mysqldb
     ports:
