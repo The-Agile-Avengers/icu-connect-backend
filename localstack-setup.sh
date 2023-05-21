@@ -3,8 +3,9 @@
 echo "Please enter localstack PRO account API key:"
 read localstack_api_key
 
-echo -e "\n\n\n\n# stop and destroy existing containers"
+echo -e "\n\n\n\n# stop and destroy existing containers..."
 docker stop $(docker ps -aq) && docker rm $(docker ps -aq)
+sleep 3
 echo -e "\033[32m\xE2\x9C\x94 Done\033[0m"
 
 echo -e "\n\n\n\n# start localstack"
@@ -14,7 +15,7 @@ echo -e "\n\n\n\n# start localstack"
 # Open a new terminal and execute the Docker command
 osascript <<END
 tell application "Terminal"
-    do script "docker run --rm -it -p 4566:4566 -p 4510-4559:4510-4559 -v /var/run/docker.sock:/var/run/docker.sock -e PERSISTENCE=1 -e LOCALSTACK_API_KEY=$localstack_api_key localstack/localstack-pro"
+    do script "docker run --rm -it -p 4566:4566 -p 4510-4559:4510-4559 -v /var/run/docker.sock:/var/run/docker.sock -e PERSISTENCE=1 -e LOCALSTACK_API_KEY=${localstack_api_key} localstack/localstack-pro"
 end tell
 END
 
@@ -65,6 +66,7 @@ awslocal ecs register-task-definition \
             "portMappings": [
                 {
                     "containerPort": 8080,
+                    "hostPort": 8080,
                     "protocol": "tcp"
                 }
             ],
@@ -147,5 +149,5 @@ echo -e "                                 "
 
 port_only=${port:8}
 echo -e "\n${RED}Go to the frontend repository and run the following command to start the ICU-CONNECT client:${NO_COLOR}\n"
-echo -e "REACT_APP_BACKEND_PORT=$port_only npm start"
+echo -e "REACT_APP_BACKEND_PORT=$port_only npm install"
 echo -e "\n"
