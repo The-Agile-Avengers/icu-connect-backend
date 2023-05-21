@@ -1,19 +1,35 @@
-version: "3.9"
-
+version: '3.9'
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: mysql-server
-    environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_USER: test
-      MYSQL_PASSWORD: test
-      MYSQL_DATABASE: testdb
-    volumes:
-      - mysql-data:/var/lib/mysql
-    ports:
-      - "3306:3306"
-    restart: always
 
+  mysqldb:
+    container_name: mysqldb
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=test
+      - MYSQL_DATABASE=icudb1
+      - MYSQL_USER=test
+      - MYSQL_PASSWORD=test
+    restart: always
+    ports:
+      - 3306:3306
+    volumes:
+      - mysqldb:/var/lib/mysql
+
+  api:
+    container_name: api
+    image: icu-connect-backend
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    environment:
+      SPRING_DATASOURCE_PASSWORD: test
+      SPRING_DATASOURCE_USER: test
+      SPRING_DATASOURCE_NAME: icudb1
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/icudb1?createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
+    depends_on:
+      - mysqldb
+    ports:
+      - 8080:8080
+    restart: always
 volumes:
-  mysql-data:
+  mysqldb:
